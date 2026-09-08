@@ -6,7 +6,7 @@
   <title>Свадебный Квест</title>
   <!-- Telegram Web App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- библиотека Конфетти -->
+  <!-- библиотека Конфетти (хлопушка) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
@@ -22,6 +22,7 @@
       --error-bg: rgba(255, 69, 58, 0.15);
       --error-border: #ff453a;
       --error-text: #ff453a;
+      --gold-accent: #d4af37;
     }
 
     * {
@@ -89,18 +90,19 @@
       font-weight: 400;
     }
 
-    /* Фотография с размытием в стиле iOS */
+    /* Карточка с иллюстрацией */
     .media-card {
       width: 100%;
       flex: 1;
-      max-height: 260px;
+      max-height: 270px;
       min-height: 180px;
-      margin: 14px 0;
+      margin: 12px 0;
       border-radius: 20px;
       overflow: hidden;
       position: relative;
       background: #1c1c1e;
       border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .media-card img {
@@ -167,7 +169,7 @@
       color: var(--error-text) !important;
     }
 
-    /* Синяя кнопка Apple дальше */
+    /* Синяя кнопка продолжить */
     .next-btn {
       width: 100%;
       padding: 15px;
@@ -196,7 +198,7 @@
       opacity: 0.9;
     }
 
-    /* Плавная анимация смены шагов */
+    /* Анимация смены кадров */
     .fade-wrapper {
       opacity: 1;
       transform: scale(1);
@@ -212,23 +214,55 @@
       transform: scale(0.96);
     }
 
-    /* Подарок / QR код в финале */
-    .qr-box {
+    /* Дизайн финала: Подарочный сертификат Lumísfera */
+    .cert-card {
+      width: 100%;
+      background: linear-gradient(145deg, #18181a, #0b0b0c);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 18px;
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 16px;
-      border: 1px dashed rgba(48, 209, 88, 0.4);
+      gap: 10px;
     }
 
-    .qr-box img {
-      width: 160px;
-      height: 160px;
-      border-radius: 12px;
-      margin-top: 8px;
+    .cert-brand {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .cert-title {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--gold-accent);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .cert-text {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #c7c7cc;
+      margin-top: 2px;
+    }
+
+    .cert-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 20px;
+      color: #e5c158;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -239,16 +273,16 @@
     <!-- Шапка -->
     <div class="header">
       <span class="step-badge" id="stepBadge">Шаг 1 из 7</span>
-      <h1 class="title" id="stepTitle">Встреча в Уральске</h1>
-      <p class="description" id="stepDesc">С этого места началась история любви...</p>
+      <h1 class="title" id="stepTitle">Заголовок</h1>
+      <p class="description" id="stepDesc">Описание шага...</p>
     </div>
 
-    <!-- Картинка -->
+    <!-- Иллюстрация -->
     <div class="media-card">
-      <img id="stepImg" src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800" alt="Арт страницы">
+      <img id="stepImg" src="" alt="Иллюстрация">
     </div>
 
-    <!-- Вопрос и ответы -->
+    <!-- Вопрос и интерактив -->
     <div class="interactive-area">
       <div class="question" id="stepQuestion">Вопрос...</div>
       <div class="options" id="optionsContainer"></div>
@@ -263,12 +297,13 @@
     window.Telegram.WebApp.expand();
   }
 
+  // Арты в атмосферном темном графическом стиле
   const steps = [
     {
       badge: "Шаг 1 из 7 • Уральск",
       title: "Глава 1: Первое чувство",
-      desc: "Уральск. Город, где пересеклись две жизненные орбиты.",
-      img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800",
+      desc: "Уральск. Город, где пересеклись два жизненных пути.",
+      img: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&auto=format&fit=crop",
       question: "Помнишь ли ты, где произошло то самое знакомство?",
       options: [
         { text: "На прогулке с общими друзьями", correct: true },
@@ -279,8 +314,8 @@
     {
       badge: "Шаг 2 из 7 • Расстояние",
       title: "Глава 2: Уфа ↔ Самара",
-      desc: "Учеба в УГНТУ и учеба в Самаре. Бесконечные звонки и ожидание встреч.",
-      img: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+      desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
+      img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop",
       question: "Сколько примерно километров соединяло ваши города?",
       options: [
         { text: "Около 250 км", correct: false },
@@ -291,55 +326,73 @@
     {
       badge: "Шаг 3 из 7 • Дом",
       title: "Глава 3: Вместе в Самаре",
-      desc: "Конец билетам и ожиданию! Наконец-то один город и общий уют.",
-      img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
-      question: "Что помогло быстрее всего обустроить ваш быт?",
+      desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
+      img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop",
+      question: "Что помогло быстрее всего обустроить ваш уют?",
       options: [
-        { text: "Пицца по пятницам и тёплые беседы", correct: true },
-        { text: "Споры о том, кто сегодня моет посуду", correct: false }
+        { text: "Тёплые беседы, душевный чай и забота", correct: true },
+        { text: "Бесконечные споры о бытовых мелочах", correct: false }
       ]
     },
     {
       badge: "Шаг 4 из 7 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
-      desc: "Тропический закат, океан и тот самый важный шаг 💍",
-      img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+      desc: "Ночной океан, звездное небо и самый важный ответ 💍",
+      img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop",
       question: "Какая атмосфера царила в тот незабываемый момент?",
       options: [
-        { text: "Сказочный романтический закат", correct: true },
-        { text: "Полный экспромт и легкое волнение", correct: true }
+        { text: "Волшебный закат и полная гармония", correct: true },
+        { text: "Легкий экспромт и океан эмоций", correct: true }
       ]
     },
     {
       badge: "Шаг 5 из 7 • Алматы",
       title: "Глава 5: В горах с друзьями",
-      desc: "Заснеженные вершины, горный воздух и лучшая компания!",
-      img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
+      desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
+      img: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800&auto=format&fit=crop",
       question: "Главный ингредиент идеального похода в горы?",
       options: [
-        { text: "Надежные друзья и море юмора", correct: true }
+        { text: "Надежные друзья и уют у огня", correct: true }
       ]
     },
     {
       badge: "Шаг 6 из 7 • Праздник",
-      title: "Глава 6: День Свадьбы 🍾",
-      desc: "День рождения новой семьи! Пусть жизнь будет яркой!",
-      img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800",
-      question: "Что кричим прямо сейчас?",
+      title: "Глава 6: День Свадьбы 🥂",
+      desc: "Рождение новой семьи при свете сотен огней!",
+      img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop",
+      question: "Что кричим молодоженам прямо сейчас?",
       options: [
         { text: "ГОРЬКО! 🎉", correct: true }
       ]
     },
     {
       badge: "Шаг 7 из 7 • Финал",
-      title: "Главный подарок! 🎁",
-      desc: "Вы прошли весь путь! Пора как следует отдохнуть на лоне природы.",
-      img: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=800",
+      title: "Главный подарок! 🕯️",
+      desc: "Вы прошли весь квест! Вас ждет вечер живой музыки в атмосфере тысяч свечей.",
+      img: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&auto=format&fit=crop",
       isFinal: true
     }
   ];
 
   let currentStep = 0;
+
+  // Функция запуска "хлопушки" как в Telegram
+  function triggerPopPopper() {
+    // Выстрел слева
+    confetti({
+      particleCount: 70,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.8 }
+    });
+    // Выстрел справа
+    confetti({
+      particleCount: 70,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.8 }
+    });
+  }
 
   function renderStep() {
     const data = steps[currentStep];
@@ -357,11 +410,16 @@
 
     if (data.isFinal) {
       questionEl.innerHTML = `
-        <div class="qr-box">
-          <p style="font-size:13px; font-weight:600; color: var(--success-text);">Ваш сертификат в глэмпинг:</p>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com" alt="QR-код">
+        <div class="cert-card">
+          <div class="cert-brand">LUMÍSFERA</div>
+          <div class="cert-title">Подарочный Сертификат</div>
+          <p class="cert-text">Музыкальное шоу при свече тысяч огней. Погружение в атмосферу живой музыки, тепла и вдохновения.</p>
+          <div class="cert-badge">✨ Билет на концерт</div>
         </div>`;
-      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      
+      // Запуск хлопушки
+      triggerPopPopper();
+      setTimeout(triggerPopPopper, 400);
       return;
     }
 
