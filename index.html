@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Свадебный Квест</title>
+  <!-- Telegram Web App Script -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- библиотека Конфетти -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f7f9fc; color: #2d3748; display: flex; justify-content: center; min-height: 100vh; padding: 12px; }
+    .card { background: #ffffff; width: 100%; max-width: 420px; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; position: relative; margin: auto; }
+    .step-badge { background: #e2e8f0; color: #4a5568; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 20px; width: fit-content; margin-bottom: 12px; text-transform: uppercase; }
+    .title { font-size: 20px; font-weight: 800; color: #1a202c; margin-bottom: 8px; }
+    .description { font-size: 14px; color: #718096; line-height: 1.4; margin-bottom: 16px; }
+    .photo-container { width: 100%; height: 210px; border-radius: 14px; overflow: hidden; margin-bottom: 16px; background: #edf2f7; }
+    .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+    .question { font-size: 15px; font-weight: 700; color: #2d3748; margin-bottom: 12px; }
+    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .btn-option { padding: 12px 16px; border: 2px solid #e2e8f0; background: #fff; border-radius: 12px; font-size: 14px; font-weight: 600; color: #4a5568; text-align: left; transition: all 0.2s ease; cursor: pointer; }
+    .btn-option.correct { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; font-weight: 700; }
+    .btn-option.wrong { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+    .next-btn { width: 100%; padding: 14px; background: #3b82f6; color: #ffffff; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: none; text-align: center; }
+    .next-btn.visible { display: block; animation: fadeIn 0.3s forwards; }
+    .qr-container { text-align: center; margin-top: 10px; }
+    .qr-container img { width: 180px; height: 180px; border-radius: 12px; border: 2px dashed #10b981; padding: 6px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div>
+    <div class="step-badge" id="stepBadge">Шаг 1 из 7</div>
+    <h2 class="title" id="stepTitle">Встреча в Уральске</h2>
+    <p class="description" id="stepDesc">С этого места началась история любви...</p>
+    
+    <div class="photo-container">
+      <img id="stepImg" src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800" alt="Фото этапа">
+    </div>
+
+    <div class="question" id="stepQuestion">Вопрос...</div>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+
+  <button class="next-btn" id="nextBtn" onclick="nextStep()">Дальше ➔</button>
+</div>
+
+<script>
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
+
+  const steps = [
+    {
+      badge: "Шаг 1 из 7 • Уральск",
+      title: "Глава 1: Где всё началось",
+      desc: "Уральск. Город, где пересеклись два жизненных пути и зародилось первое чувство.",
+      img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800",
+      question: "Помнишь ли ты, где произошло то самое знакомство?",
+      options: [
+        { text: "На прогулке с общими друзьями", correct: true },
+        { text: "В уютном кафе у дома", correct: false },
+        { text: "Случайно на улице", correct: false }
+      ]
+    },
+    {
+      badge: "Шаг 2 из 7 • Разделяющие города",
+      title: "Глава 2: Уфа ↔ Самара",
+      desc: "Учеба в УГНТУ в Уфе и учеба в Самаре. Поезда, звонки и ожидание встреч.",
+      img: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800",
+      question: "Сколько примерно километров соединяло ваши города?",
+      options: [
+        { text: "Около 250 км", correct: false },
+        { text: "Примерно 460 км", correct: true },
+        { text: "Больше 800 км", correct: false }
+      ]
+    },
+    {
+      badge: "Шаг 3 из 7 • Воссоединение",
+      title: "Глава 3: Вместе в Самаре",
+      desc: "Конец бесконечным билетам! Наконец-то один город, общий быт и уютные вечера.",
+      img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+      question: "Что помогло быстрее всего обустроить совместный уют?",
+      options: [
+        { text: "Пицца по пятницам и долгие беседы", correct: true },
+        { text: "Споры о том, кто моет посуду", correct: false }
+      ]
+    },
+    {
+      badge: "Шаг 4 из 7 • Филиппины",
+      title: "Глава 4: Манила и предложение",
+      desc: "Тропический воздух, океан и самый важный вопрос, на который прозвучало «ДА!» 💍",
+      img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+      question: "Какая атмосфера царила в тот незабываемый момент?",
+      options: [
+        { text: "Сказочный романтический закат", correct: true },
+        { text: "Полный экспромт и адреналин", correct: true }
+      ]
+    },
+    {
+      badge: "Шаг 5 из 7 • Алматы",
+      title: "Глава 5: В горах с друзьями",
+      desc: "Заснеженные вершины Алматы, чистейший воздух и отличная компания!",
+      img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
+      question: "Главный секрет идеального похода в горы?",
+      options: [
+        { text: "Надежные друзья и море юмора", correct: true }
+      ]
+    },
+    {
+      badge: "Шаг 6 из 7 • Торжество",
+      title: "Глава 6: День Свадьбы 🍾",
+      desc: "День рождения вашей семьи! Пусть вся жизнь будет такой же яркой, как ваши путешествия!",
+      img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800",
+      question: "Что нужно крикнуть прямо сейчас?",
+      options: [
+        { text: "ГОРЬКО! 🎉", correct: true }
+      ]
+    },
+    {
+      badge: "Шаг 7 из 7 • Финал",
+      title: "Главный подарок! 🎁",
+      desc: "Поздравляем! Вы прошли весь путь. Впереди вас ждет отдых в уютном глэмпинге на лоне природы!",
+      img: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=800",
+      isFinal: true
+    }
+  ];
+
+  let currentStep = 0;
+
+  function renderStep() {
+    const data = steps[currentStep];
+    document.getElementById('stepBadge').innerText = data.badge;
+    document.getElementById('stepTitle').innerText = data.title;
+    document.getElementById('stepDesc').innerText = data.desc;
+    document.getElementById('stepImg').src = data.img;
+    
+    const optionsContainer = document.getElementById('optionsContainer');
+    const questionEl = document.getElementById('stepQuestion');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    optionsContainer.innerHTML = '';
+    nextBtn.classList.remove('visible');
+
+    if (data.isFinal) {
+      questionEl.innerHTML = `<div class="qr-container">
+        <p style="margin-bottom:10px; font-weight:700; color:#10b981;">Ваш сертификат на отдых:</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com" alt="QR-код">
+      </div>`;
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      return;
+    }
+
+    questionEl.innerText = data.question;
+
+    data.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-option';
+      btn.innerText = opt.text;
+      btn.onclick = () => {
+        const allBtns = optionsContainer.querySelectorAll('.btn-option');
+        allBtns.forEach(b => b.disabled = true);
+        
+        if (opt.correct) {
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('wrong');
+        }
+        nextBtn.classList.add('visible');
+      };
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  function nextStep() {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      renderStep();
+    }
+  }
+
+  renderStep();
+</script>
+</body>
+</html>
