@@ -110,6 +110,24 @@
       display: block;
     }
 
+    /* Полноэкранный текстовый блок для transition-экрана */
+    .intro-text-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px 10px;
+    }
+
+    .intro-text-block h2 {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+
     /* Нижний интерактивный блок */
     .interactive-area {
       display: flex;
@@ -245,7 +263,7 @@
 <div class="app-container">
   <div class="fade-wrapper" id="fadeWrapper">
     <!-- Шапка -->
-    <div class="header">
+    <div class="header" id="headerBlock">
       <span class="step-badge" id="stepBadge">Шаг 1 из 12</span>
       <h1 class="title" id="stepTitle">Заголовок</h1>
       <p class="description" id="stepDesc">Описание шага...</p>
@@ -254,6 +272,11 @@
     <!-- Иллюстрация основного квеста или сертификат -->
     <div class="media-card" id="mediaCardContainer">
       <img id="stepImg" src="" alt="Иллюстрация">
+    </div>
+
+    <!-- Область для переходного текстового экрана -->
+    <div class="intro-text-block" id="introTextBlock" style="display: none;">
+      <h2 id="introTextContent"></h2>
     </div>
 
     <!-- Область Скретч-карты -->
@@ -348,12 +371,19 @@
       ]
     },
 
-    /* ПОДАРКИ И СЕРТИФИКАТЫ */
+    /* ЭКРАН-ПЕРЕХОД И ПОДАРКИ */
+
+    // Переходный экран перед подарками
+    {
+      isIntroText: true,
+      text: "Желаю вам наслаждаться каждым днем вашей жизни так же, как…",
+      btnText: "Открыть подарки ✨"
+    },
     
     // Подарок 1: Карточка Люмисфера (Скретч)
     {
       badge: "Подарок 1 из 3 🎁",
-      title: "Красивой музыкой ✨",
+      title: "чарующей музыкой в окружении тысяч свечей",
       desc: "Сотрите защитный слой, чтобы открыть первый подарок!",
       giftImg: "https://i.postimg.cc/rsYDMJDZ/IMG-7441.jpg",
       isScratch: true,
@@ -369,10 +399,10 @@
       btnText: "Следующий подарок ➔"
     },
 
-    // Подарок 2: Карточка Кулинарного мастер-класса / Аквариум (Скретч)
+    // Подарок 2: Карточка Кулинарного мастер-класса (Скретч)
     {
       badge: "Подарок 2 из 3 🎁",
-      title: "Вкусной едой 🍽️",
+      title: "вкусной едой, приготовленной своими руками",
       desc: "Сотрите защитный слой, чтобы узнать следующий сюрприз!",
       giftImg: "https://i.postimg.cc/q7LMpLY4/IMG-7568.jpg",
       isScratch: true,
@@ -391,7 +421,7 @@
     // Подарок 3: Карточка Глэмпинга (Скретч)
     {
       badge: "Подарок 3 из 3 🎁",
-      title: "И прекрасной природой 🌲",
+      title: "незабываемыми вечерами на лоне природы",
       desc: "Сотрите защитный слой для раскрытия финального подарка!",
       giftImg: "https://i.postimg.cc/pV1r9sdz/IMG-7558.jpg",
       isScratch: true,
@@ -473,13 +503,35 @@
 
   function renderStep() {
     const data = steps[currentStep];
+
+    const headerBlock = document.getElementById('headerBlock');
+    const mediaCardContainer = document.getElementById('mediaCardContainer');
+    const introTextBlock = document.getElementById('introTextBlock');
+    const giftCardArea = document.getElementById('giftCardArea');
+    const interactiveArea = document.getElementById('interactiveArea');
+
+    // 0. РЕЖИМ ПЕРЕХОДНОГО ТЕКСТОВОГО ЭКРАНА
+    if (data.isIntroText) {
+      headerBlock.style.display = 'none';
+      mediaCardContainer.style.display = 'none';
+      giftCardArea.style.display = 'none';
+      
+      introTextBlock.style.display = 'flex';
+      document.getElementById('introTextContent').innerText = data.text;
+
+      interactiveArea.innerHTML = `
+        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">${data.btnText}</button>
+      `;
+      return;
+    }
+
+    // Возвращаем видимость шапки для остальных экранов
+    headerBlock.style.display = 'flex';
+    introTextBlock.style.display = 'none';
+
     document.getElementById('stepBadge').innerText = data.badge;
     document.getElementById('stepTitle').innerText = data.title;
     document.getElementById('stepDesc').innerText = data.desc;
-
-    const mediaCardContainer = document.getElementById('mediaCardContainer');
-    const giftCardArea = document.getElementById('giftCardArea');
-    const interactiveArea = document.getElementById('interactiveArea');
 
     // 1. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
     if (data.isScratch) {
