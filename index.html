@@ -44,7 +44,7 @@
       align-items: center;
     }
 
-    /* Мобильный контейнер / Карточка */
+    /* Мобильный контейнер */
     .app-container {
       width: 100%;
       max-width: 420px;
@@ -88,11 +88,11 @@
       font-weight: 400;
     }
 
-    /* Карточка с иллюстрацией */
+    /* Карточка с иллюстрацией (Квест и Четкие сертификаты) */
     .media-card {
       width: 100%;
       flex: 1;
-      max-height: 270px;
+      max-height: 280px;
       min-height: 180px;
       margin: 12px 0;
       border-radius: 20px;
@@ -108,7 +108,6 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     /* Нижний интерактивный блок */
@@ -132,7 +131,7 @@
       gap: 8px;
     }
 
-    /* Кнопки ответов Apple style */
+    /* Кнопки ответов */
     .btn-option {
       width: 100%;
       padding: 14px 16px;
@@ -146,7 +145,7 @@
       font-weight: 500;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: all 0.3s ease;
     }
 
     .btn-option:active {
@@ -167,7 +166,7 @@
       color: var(--error-text) !important;
     }
 
-    /* Синяя кнопка продолжить */
+    /* Синяя главная кнопка */
     .next-btn {
       width: 100%;
       padding: 15px;
@@ -200,7 +199,7 @@
     .fade-wrapper {
       opacity: 1;
       transform: scale(1);
-      transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: opacity 0.35s ease, transform 0.35s ease;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -212,16 +211,16 @@
       transform: scale(0.96);
     }
 
-    /* Стили для скретч-карты подарка */
+    /* Стили для скретч-карты */
     .scratch-container {
       position: relative;
       width: 100%;
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
       border: 1px solid rgba(212, 175, 55, 0.4);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       background: #18181a;
-      margin: 10px 0;
+      margin: 12px 0;
     }
 
     .scratch-container img {
@@ -247,20 +246,20 @@
   <div class="fade-wrapper" id="fadeWrapper">
     <!-- Шапка -->
     <div class="header">
-      <span class="step-badge" id="stepBadge">Шаг 1 из 10</span>
+      <span class="step-badge" id="stepBadge">Шаг 1 из 12</span>
       <h1 class="title" id="stepTitle">Заголовок</h1>
       <p class="description" id="stepDesc">Описание шага...</p>
     </div>
 
-    <!-- Иллюстрация основного квеста -->
+    <!-- Иллюстрация основного квеста или четкого сертификата -->
     <div class="media-card" id="mediaCardContainer">
       <img id="stepImg" src="" alt="Иллюстрация">
     </div>
 
-    <!-- Область подарков (скретч-карта) -->
+    <!-- Область Скретч-карты -->
     <div id="giftCardArea" style="display: none; width: 100%;">
       <div class="scratch-container">
-        <img id="giftImg" src="" alt="Сертификат" crossorigin="anonymous">
+        <img id="giftImg" src="" alt="Карточка" crossorigin="anonymous">
         <canvas class="scratch-canvas" id="giftCanvas"></canvas>
       </div>
     </div>
@@ -280,10 +279,10 @@
     window.Telegram.WebApp.expand();
   }
 
-  // Шаги квеста и отдельные подарки
+  // Массив всех шагов: Квест -> Подарок 1 (Скретч) -> Сертификат 1 -> Подарок 2 (Скретч) -> Сертификат 2 -> Подарок 3 (Скретч) -> Сертификат 3
   const steps = [
     {
-      badge: "Шаг 1 из 10 • Уральск",
+      badge: "Шаг 1 из 12 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
       img: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&auto=format&fit=crop",
@@ -295,7 +294,7 @@
       ]
     },
     {
-      badge: "Шаг 2 из 10 • Расстояние",
+      badge: "Шаг 2 из 12 • Расстояние",
       title: "Глава 2: Уфа ↔ Самара",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
       img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop",
@@ -307,7 +306,7 @@
       ]
     },
     {
-      badge: "Шаг 3 из 10 • Дом",
+      badge: "Шаг 3 из 12 • Дом",
       title: "Глава 3: Вместе в Самаре",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
       img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop",
@@ -318,7 +317,7 @@
       ]
     },
     {
-      badge: "Шаг 4 из 10 • Манила",
+      badge: "Шаг 4 из 12 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
       img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop",
@@ -329,7 +328,7 @@
       ]
     },
     {
-      badge: "Шаг 5 из 10 • Алматы",
+      badge: "Шаг 5 из 12 • Алматы",
       title: "Глава 5: В горах с друзьями",
       desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
       img: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800&auto=format&fit=crop",
@@ -339,7 +338,7 @@
       ]
     },
     {
-      badge: "Шаг 6 из 10 • Праздник",
+      badge: "Шаг 6 из 12 • Праздник",
       title: "Глава 6: День Свадьбы 🥂",
       desc: "Рождение новой семьи при свете сотен огней!",
       img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop",
@@ -349,49 +348,82 @@
       ]
     },
 
-    /* ПОДАРКИ ПО ОТДЕЛЬНОСТИ (7 - 10) С ОБНОВЛЕННОЙ ОЧЕРЕДНОСТЬЮ КАРТИНОК */
+    /* ПОДАРКИ И СЕРТИФИКАТЫ */
+    
+    // Подарок 1: Люмисфера (Скретч)
     {
-      badge: "Подарок 1 из 4 🎁",
-      title: "Особый вечер 🕯️",
-      desc: "Сотрите защитный слой, чтобы открыть первый сертификат!",
-      giftImg: "https://i.postimg.cc/rsYDMJDZ/IMG-7441.jpg",
-      isGift: true
-    },
-    {
-      badge: "Подарок 2 из 4 🎁",
+      badge: "Подарок 1 из 3 🎁",
       title: "Красивой музыкой ✨",
-      desc: "Сотрите защитный слой, чтобы открыть второй подарок!",
+      desc: "Сотрите защитный слой, чтобы открыть тайный подарок!",
       giftImg: "https://i.postimg.cc/PxkGRT9n/IMG-7621.jpg",
-      isGift: true
+      isScratch: true,
+      btnText: "Получить сертификат 🎟️"
     },
+    // Сертификат 1: Люмисфера (Чистый + Хлопушка)
     {
-      badge: "Подарок 3 из 4 🎁",
-      title: "И прекрасной природой 🌲",
-      desc: "Сотрите защитный слой, чтобы узнать детали третьего подарка!",
-      giftImg: "https://i.postimg.cc/q7LMpLY4/IMG-7568.jpg",
-      isGift: true
+      badge: "Ваш Сертификат 🎁",
+      title: "Концерт Люмисфера 🎻",
+      desc: "Ваш билет на незабываемый музыкальный вечер!",
+      img: "https://i.postimg.cc/rsYDMJDZ/IMG-7441.jpg",
+      isCertificate: true,
+      btnText: "Следующий подарок ➔"
     },
+
+    // Подарок 2: Аквариум (Скретч)
     {
-      badge: "Подарок 4 из 4 🎁",
+      badge: "Подарок 2 из 3 🎁",
       title: "Вкусной едой 🍽️",
-      desc: "Финальный подарок! Сотрите слой для открытия.",
+      desc: "Сотрите защитный слой, чтобы узнать следующий сюрприз!",
       giftImg: "https://i.postimg.cc/pV1r9sdz/IMG-7558.jpg",
-      isGift: true,
-      isFinalGift: true
+      isScratch: true,
+      btnText: "Получить сертификат 🎟️"
+    },
+    // Сертификат 2: Кулинарный мастер-класс (Чистый + Хлопушка)
+    {
+      badge: "Ваш Сертификат 🎁",
+      title: "Кулинарный мастер-класс 🍳",
+      desc: "Сертификат на совместный гастрономический вечер!",
+      img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop", // Временная заглушка
+      isCertificate: true,
+      btnText: "Третий подарок ➔"
+    },
+
+    // Подарок 3: Глэмпинг (Скретч)
+    {
+      badge: "Подарок 3 из 3 🎁",
+      title: "И прекрасной природой 🌲",
+      desc: "Сотрите защитный слой для раскрытия финального подарка!",
+      giftImg: "https://i.postimg.cc/q7LMpLY4/IMG-7568.jpg",
+      isScratch: true,
+      btnText: "Получить сертификат 🎟️"
+    },
+    // Сертификат 3: Глэмпинг (Чистый + Хлопушка + Финал)
+    {
+      badge: "Финальный Сертификат 🎁",
+      title: "Отдых в Глэмпинге ⛺",
+      desc: "Незабываемые выходные наедине с природой!",
+      img: "https://images.unsplash.com/photo-1537225228614-56cc3556d7ed?w=800&auto=format&fit=crop", // Временная заглушка
+      isCertificate: true,
+      isFinalStep: true,
+      btnText: "Завершить квест 🥂"
     }
   ];
 
   let currentStep = 0;
 
+  // Функция салюта/конфетти
   function triggerPopPopper() {
-    confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } });
-    confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } });
+    confetti({ particleCount: 70, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
+    confetti({ particleCount: 70, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
   }
 
-  // Скретч-слой
+  // Функция настройки скретч-карты
   function initScratchCard(canvas, imgElement) {
     if (!canvas || !imgElement) return;
     const ctx = canvas.getContext('2d');
+
+    let scratchedPixels = 0;
+    let totalPixels = 0;
 
     const setupCanvasSize = () => {
       canvas.width = imgElement.clientWidth || 350;
@@ -405,6 +437,8 @@
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("✨ Сотрите защитный слой ✨", canvas.width / 2, canvas.height / 2);
+
+      totalPixels = canvas.width * canvas.height;
     };
 
     if (imgElement.complete && imgElement.naturalWidth !== 0) {
@@ -430,6 +464,10 @@
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 28, 0, Math.PI * 2, false);
       ctx.fill();
+
+      // Показываем кнопку получения сертификата сразу как только начали стирать
+      const nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) nextBtn.classList.add('visible');
     };
 
     canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
@@ -451,8 +489,8 @@
     const giftCardArea = document.getElementById('giftCardArea');
     const interactiveArea = document.getElementById('interactiveArea');
 
-    // Экран Подарка
-    if (data.isGift) {
+    // 1. РЕЖИМ СКРЕТЧ-КАРТОЧКИ (Картинка под слоем)
+    if (data.isScratch) {
       mediaCardContainer.style.display = 'none';
       giftCardArea.style.display = 'block';
 
@@ -464,17 +502,29 @@
         initScratchCard(giftCanvas, giftImg);
       }, 50);
 
-      triggerPopPopper();
-
-      const btnText = data.isFinalGift ? "Завершить квест 🥂" : "Следующий подарок ➔";
-
       interactiveArea.innerHTML = `
-        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">${btnText}</button>
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">${data.btnText}</button>
       `;
       return;
     }
 
-    // Обычные экраны квеста
+    // 2. РЕЖИМ СЕРТИФИКАТА (Чистая картинка + Хлопушка)
+    if (data.isCertificate) {
+      mediaCardContainer.style.display = 'block';
+      giftCardArea.style.display = 'none';
+      document.getElementById('stepImg').src = data.img;
+
+      // Запуск конфетти при открытии сертификата
+      triggerPopPopper();
+      setTimeout(triggerPopPopper, 300);
+
+      interactiveArea.innerHTML = `
+        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">${data.btnText}</button>
+      `;
+      return;
+    }
+
+    // 3. ОБЫЧНЫЕ ШАГИ КВЕСТА С ВОПРОСАМИ
     mediaCardContainer.style.display = 'block';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
@@ -519,11 +569,11 @@
         wrapper.classList.remove('fade-out');
       }, 350);
     } else {
-      // Когда дошли до последнего подарка
+      // Финал
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.close();
       } else {
-        alert("Поздравляем! Вы открыли все подарки 🎉");
+        alert("Поздравляем! Все сертификаты успешно открыты 🎉");
       }
     }
   }
