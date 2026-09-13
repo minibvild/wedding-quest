@@ -114,10 +114,12 @@
     .intro-text-block {
       flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       padding: 20px 10px;
+      width: 100%;
     }
 
     .intro-text-block h2 {
@@ -126,6 +128,24 @@
       line-height: 1.4;
       color: var(--text-main);
       letter-spacing: -0.3px;
+      margin-bottom: 24px;
+    }
+
+    /* Финальный экран с целующим смайликом */
+    .kiss-screen {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 110px;
+      line-height: 1;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
 
     /* Нижний интерактивный блок */
@@ -133,6 +153,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      width: 100%;
     }
 
     .question {
@@ -277,6 +298,12 @@
     <!-- Область для переходного текстового экрана -->
     <div class="intro-text-block" id="introTextBlock" style="display: none;">
       <h2 id="introTextContent"></h2>
+      <div id="introBtnContainer" style="width: 100%;"></div>
+    </div>
+
+    <!-- Область для финального целующего смайлика -->
+    <div class="kiss-screen" id="kissScreen" style="display: none;">
+      😘
     </div>
 
     <!-- Область Скретч-карты -->
@@ -376,7 +403,7 @@
     // Переходный экран перед подарками
     {
       isIntroText: true,
-      text: "Желаю вам наслаждаться каждым днем вашей жизни так же, как…",
+      text: "Желаю вам наслаждаться каждым днем совместной жизни так же, как…",
       btnText: "Открыть подарки ✨"
     },
     
@@ -434,8 +461,12 @@
       desc: "Незабываемые выходные наедине с природой!",
       img: "https://images.unsplash.com/photo-1537225228614-56cc3556d7ed?w=800&auto=format&fit=crop",
       isCertificate: true,
-      isFinalStep: true,
-      btnText: "Завершить квест 🥂"
+      btnText: "Далее ➔"
+    },
+
+    // Пустая финальная страница со смайликом 😘
+    {
+      isKissScreen: true
     }
   ];
 
@@ -507,27 +538,43 @@
     const headerBlock = document.getElementById('headerBlock');
     const mediaCardContainer = document.getElementById('mediaCardContainer');
     const introTextBlock = document.getElementById('introTextBlock');
+    const kissScreen = document.getElementById('kissScreen');
     const giftCardArea = document.getElementById('giftCardArea');
     const interactiveArea = document.getElementById('interactiveArea');
 
-    // 0. РЕЖИМ ПЕРЕХОДНОГО ТЕКСТОВОГО ЭКРАНА
+    // 0. РЕЖИМ ПЕРЕХОДНОГО ТЕКСТОВОГО ЭКРАНА (Центрирован)
     if (data.isIntroText) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
       giftCardArea.style.display = 'none';
-      
+      kissScreen.style.display = 'none';
+      interactiveArea.style.display = 'none';
+
       introTextBlock.style.display = 'flex';
       document.getElementById('introTextContent').innerText = data.text;
-
-      interactiveArea.innerHTML = `
-        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">${data.btnText}</button>
+      document.getElementById('introBtnContainer').innerHTML = `
+        <button class="next-btn visible" onclick="nextStep()">${data.btnText}</button>
       `;
       return;
     }
 
-    // Возвращаем видимость шапки для остальных экранов
+    // 0.1. РЕЖИМ ФИНАЛЬНОГО ЭКРАНА С ЦЕЛУЮЩИМ СМАЙЛИКОМ 😘
+    if (data.isKissScreen) {
+      headerBlock.style.display = 'none';
+      mediaCardContainer.style.display = 'none';
+      giftCardArea.style.display = 'none';
+      introTextBlock.style.display = 'none';
+      interactiveArea.style.display = 'none';
+
+      kissScreen.style.display = 'flex';
+      return;
+    }
+
+    // Возвращаем видимость основных элементов для обычных шагов
     headerBlock.style.display = 'flex';
     introTextBlock.style.display = 'none';
+    kissScreen.style.display = 'none';
+    interactiveArea.style.display = 'flex';
 
     document.getElementById('stepBadge').innerText = data.badge;
     document.getElementById('stepTitle').innerText = data.title;
