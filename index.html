@@ -278,29 +278,42 @@
       touch-action: none;
     }
 
-    /* Стили для Пазла */
+    /* Стили для Пазла 4x5 */
     .puzzle-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-rows: repeat(5, 1fr);
       gap: 3px;
       width: 100%;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 4 / 5;
       border-radius: 16px;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       padding: 3px;
+      transition: gap 0.4s ease, padding 0.4s ease, border-radius 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .puzzle-grid.solved {
+      gap: 0px;
+      padding: 0px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(48, 209, 88, 0.3);
     }
 
     .puzzle-piece {
       width: 100%;
       height: 100%;
-      background-size: 320px 320px;
       background-repeat: no-repeat;
       border-radius: 4px;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-radius 0.4s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+    }
+
+    .puzzle-grid.solved .puzzle-piece {
+      border-radius: 0px;
+      box-shadow: none;
     }
 
     .puzzle-piece.selected {
@@ -565,18 +578,20 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
-  // Логика сборки Пазла 4x4
+  // Логика сборки Пазла 4x5
   function initPuzzle(imgUrl) {
     const puzzleContainer = document.getElementById('puzzleContainer');
     puzzleContainer.innerHTML = '';
+    puzzleContainer.classList.remove('solved');
     
-    let pieces = Array.from({ length: 16 }, (_, i) => i);
+    let pieces = Array.from({ length: 20 }, (_, i) => i);
     // Перемешивание кусочков
     do {
       pieces.sort(() => Math.random() - 0.5);
     } while (isPuzzleSolved(pieces));
 
     let selectedIndex = null;
+    let isFinished = false;
 
     function isPuzzleSolved(arr) {
       return arr.every((val, index) => val === index);
@@ -584,40 +599,45 @@
 
     function renderPuzzle() {
       puzzleContainer.innerHTML = '';
-      const size = puzzleContainer.clientWidth || 320;
+      const containerWidth = puzzleContainer.clientWidth || 320;
+      const containerHeight = (containerWidth * 5) / 4;
 
       pieces.forEach((pieceIndex, currentIndex) => {
         const div = document.createElement('div');
         div.className = 'puzzle-piece';
-        if (selectedIndex === currentIndex) div.classList.add('selected');
+        if (selectedIndex === currentIndex && !isFinished) div.classList.add('selected');
 
         const correctRow = Math.floor(pieceIndex / 4);
         const correctCol = pieceIndex % 4;
 
         div.style.backgroundImage = `url(${imgUrl})`;
-        div.style.backgroundSize = `${size}px ${size}px`;
-        div.style.backgroundPosition = `-${correctCol * (size / 4)}px -${correctRow * (size / 4)}px`;
+        div.style.backgroundSize = `${containerWidth}px ${containerHeight}px`;
+        div.style.backgroundPosition = `-${correctCol * (containerWidth / 4)}px -${correctRow * (containerHeight / 5)}px`;
 
-        div.onclick = () => {
-          if (selectedIndex === null) {
-            selectedIndex = currentIndex;
-          } else if (selectedIndex === currentIndex) {
-            selectedIndex = null;
-          } else {
-            // Обмен местами элементов
-            const temp = pieces[selectedIndex];
-            pieces[selectedIndex] = pieces[currentIndex];
-            pieces[currentIndex] = temp;
-            selectedIndex = null;
+        if (!isFinished) {
+          div.onclick = () => {
+            if (selectedIndex === null) {
+              selectedIndex = currentIndex;
+            } else if (selectedIndex === currentIndex) {
+              selectedIndex = null;
+            } else {
+              // Обмен местами элементов
+              const temp = pieces[selectedIndex];
+              pieces[selectedIndex] = pieces[currentIndex];
+              pieces[currentIndex] = temp;
+              selectedIndex = null;
 
-            if (isPuzzleSolved(pieces)) {
-              triggerPopPopper();
-              const nextBtn = document.getElementById('nextBtn');
-              if (nextBtn) nextBtn.classList.add('visible');
+              if (isPuzzleSolved(pieces)) {
+                isFinished = true;
+                puzzleContainer.classList.add('solved');
+                triggerPopPopper();
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) nextBtn.classList.add('visible');
+              }
             }
-          }
-          renderPuzzle();
-        };
+            renderPuzzle();
+          };
+        }
 
         puzzleContainer.appendChild(div);
       });
