@@ -277,6 +277,37 @@
       cursor: pointer;
       touch-action: none;
     }
+
+    /* Стили для Пазла */
+    .puzzle-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 3px;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 3px;
+    }
+
+    .puzzle-piece {
+      width: 100%;
+      height: 100%;
+      background-size: 320px 320px;
+      background-repeat: no-repeat;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    }
+
+    .puzzle-piece.selected {
+      outline: 2px solid var(--accent-color);
+      transform: scale(0.94);
+      z-index: 2;
+    }
   </style>
 </head>
 <body>
@@ -293,6 +324,11 @@
     <!-- Иллюстрация основного квеста или сертификат -->
     <div class="media-card" id="mediaCardContainer">
       <img id="stepImg" src="" alt="Иллюстрация">
+    </div>
+
+    <!-- Область для Пазла -->
+    <div id="puzzleArea" style="display: none; width: 100%; margin: 12px 0;">
+      <div class="puzzle-grid" id="puzzleContainer"></div>
     </div>
 
     <!-- Область для переходного текстового экрана -->
@@ -347,12 +383,12 @@
       badge: "Шаг 2 из 12 • Расстояние",
       title: "Глава 2: Уфа ↔ Самара",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
-      img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop",
-      question: "Сколько примерно километров соединяло ваши города?",
+      img: "https://i.postimg.cc/wMhrfvsp/IMG-7669.jpg",
+      question: "Длина, разделявшей вас, железной дороги между Самарой и Уфой",
       options: [
-        { text: "Около 250 км", correct: false },
-        { text: "Примерно 460 км", correct: true },
-        { text: "Больше 800 км", correct: false }
+        { text: "Около 420 км", correct: false },
+        { text: "Примерно 530 км", correct: true },
+        { text: "Больше 640 км", correct: false }
       ]
     },
     {
@@ -389,13 +425,10 @@
     },
     {
       badge: "Шаг 6 из 12 • Праздник",
-      title: "Глава 6: День Свадьбы 🥂",
-      desc: "Рождение новой семьи при свете сотен огней!",
-      img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop",
-      question: "Что кричим молодоженам прямо сейчас?",
-      options: [
-        { text: "ГОРЬКО! 🎉", correct: true }
-      ]
+      title: "Тот самый день💍",
+      desc: "Соберите пазл, чтобы восстановить самый важный кадр!",
+      img: "https://i.postimg.cc/SKxJmYyz/IMG-7670.jpg",
+      isPuzzle: true
     },
 
     /* ЭКРАН-ПЕРЕХОД И ПОДАРКИ */
@@ -532,11 +565,73 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
+  // Логика сборки Пазла 4x4
+  function initPuzzle(imgUrl) {
+    const puzzleContainer = document.getElementById('puzzleContainer');
+    puzzleContainer.innerHTML = '';
+    
+    let pieces = Array.from({ length: 16 }, (_, i) => i);
+    // Перемешивание кусочков
+    do {
+      pieces.sort(() => Math.random() - 0.5);
+    } while (isPuzzleSolved(pieces));
+
+    let selectedIndex = null;
+
+    function isPuzzleSolved(arr) {
+      return arr.every((val, index) => val === index);
+    }
+
+    function renderPuzzle() {
+      puzzleContainer.innerHTML = '';
+      const size = puzzleContainer.clientWidth || 320;
+
+      pieces.forEach((pieceIndex, currentIndex) => {
+        const div = document.createElement('div');
+        div.className = 'puzzle-piece';
+        if (selectedIndex === currentIndex) div.classList.add('selected');
+
+        const correctRow = Math.floor(pieceIndex / 4);
+        const correctCol = pieceIndex % 4;
+
+        div.style.backgroundImage = `url(${imgUrl})`;
+        div.style.backgroundSize = `${size}px ${size}px`;
+        div.style.backgroundPosition = `-${correctCol * (size / 4)}px -${correctRow * (size / 4)}px`;
+
+        div.onclick = () => {
+          if (selectedIndex === null) {
+            selectedIndex = currentIndex;
+          } else if (selectedIndex === currentIndex) {
+            selectedIndex = null;
+          } else {
+            // Обмен местами элементов
+            const temp = pieces[selectedIndex];
+            pieces[selectedIndex] = pieces[currentIndex];
+            pieces[currentIndex] = temp;
+            selectedIndex = null;
+
+            if (isPuzzleSolved(pieces)) {
+              triggerPopPopper();
+              const nextBtn = document.getElementById('nextBtn');
+              if (nextBtn) nextBtn.classList.add('visible');
+            }
+          }
+          renderPuzzle();
+        };
+
+        puzzleContainer.appendChild(div);
+      });
+    }
+
+    renderPuzzle();
+  }
+
   function renderStep() {
     const data = steps[currentStep];
 
     const headerBlock = document.getElementById('headerBlock');
     const mediaCardContainer = document.getElementById('mediaCardContainer');
+    const puzzleArea = document.getElementById('puzzleArea');
     const introTextBlock = document.getElementById('introTextBlock');
     const kissScreen = document.getElementById('kissScreen');
     const giftCardArea = document.getElementById('giftCardArea');
@@ -546,6 +641,7 @@
     if (data.isIntroText) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
+      puzzleArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       kissScreen.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -562,6 +658,7 @@
     if (data.isKissScreen) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
+      puzzleArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       introTextBlock.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -580,9 +677,26 @@
     document.getElementById('stepTitle').innerText = data.title;
     document.getElementById('stepDesc').innerText = data.desc;
 
-    // 1. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
+    // 1. РЕЖИМ ПАЗЛА
+    if (data.isPuzzle) {
+      mediaCardContainer.style.display = 'none';
+      giftCardArea.style.display = 'none';
+      puzzleArea.style.display = 'block';
+
+      interactiveArea.innerHTML = `
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
+
+      setTimeout(() => {
+        initPuzzle(data.img);
+      }, 50);
+      return;
+    }
+
+    // 2. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
     if (data.isScratch) {
       mediaCardContainer.style.display = 'none';
+      puzzleArea.style.display = 'none';
       giftCardArea.style.display = 'block';
 
       const giftImg = document.getElementById('giftImg');
@@ -599,9 +713,10 @@
       return;
     }
 
-    // 2. РЕЖИМ СЕРТИФИКАТА
+    // 3. РЕЖИМ СЕРТИФИКАТА
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'block';
+      puzzleArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       document.getElementById('stepImg').src = data.img;
 
@@ -614,8 +729,9 @@
       return;
     }
 
-    // 3. ШАГИ КВЕСТА
+    // 4. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
     mediaCardContainer.style.display = 'block';
+    puzzleArea.style.display = 'none';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
 
