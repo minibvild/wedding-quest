@@ -329,7 +329,7 @@
   <div class="fade-wrapper" id="fadeWrapper">
     <!-- Шапка -->
     <div class="header" id="headerBlock">
-      <span class="step-badge" id="stepBadge">Шаг 1 из 12</span>
+      <span class="step-badge" id="stepBadge">Шаг 1 из 14</span>
       <h1 class="title" id="stepTitle">Заголовок</h1>
       <p class="description" id="stepDesc">Описание шага...</p>
     </div>
@@ -381,10 +381,10 @@
   // Массив всех шагов квеста
   const steps = [
     {
-      badge: "Шаг 1 из 12 • Уральск",
+      badge: "Шаг 1 из 14 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
-      img: "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&auto=format&fit=crop",
+      img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
       question: "Помнишь ли ты, где произошло то самое знакомство?",
       options: [
         { text: "На прогулке с общими друзьями", correct: true },
@@ -393,7 +393,17 @@
       ]
     },
     {
-      badge: "Шаг 2 из 12 • Расстояние",
+      badge: "Шаг 2 из 14 • Воспоминания",
+      title: "Начало истории",
+      desc: "Первые совместные кадры и незабываемые моменты.",
+      img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg",
+      question: "Готовы двигаться дальше сквозь километры?",
+      options: [
+        { text: "Да, поехали дальше! ✨", correct: true }
+      ]
+    },
+    {
+      badge: "Шаг 3 из 14 • Расстояние",
       title: "Глава 2: Уфа ↔ Самара",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
       img: "https://i.postimg.cc/wMhrfvsp/IMG-7669.jpg",
@@ -405,10 +415,10 @@
       ]
     },
     {
-      badge: "Шаг 3 из 12 • Дом",
+      badge: "Шаг 4 из 14 • Дом",
       title: "Глава 3: Вместе в Самаре",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
-      img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop",
+      img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg",
       question: "Что помогло быстрее всего обустроить ваш уют?",
       options: [
         { text: "Тёплые беседы, душевный чай и забота", correct: true },
@@ -416,10 +426,20 @@
       ]
     },
     {
-      badge: "Шаг 4 из 12 • Манила",
+      badge: "Шаг 5 из 14 • Уют",
+      title: "Тёплые моменты",
+      desc: "Когда дом наполняется радостью и общими мечтами.",
+      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
+      question: "Впереди самые яркие путешествия!",
+      options: [
+        { text: "К новым горизонтам! 🌊", correct: true }
+      ]
+    },
+    {
+      badge: "Шаг 6 из 14 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
-      img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop",
+      img: "https://i.postimg.cc/9Fm8q7Rz/IMG-7694.jpg",
       question: "Какая атмосфера царила в тот незабываемый момент?",
       options: [
         { text: "Волшебный закат и полная гармония", correct: true },
@@ -427,17 +447,17 @@
       ]
     },
     {
-      badge: "Шаг 5 из 12 • Алматы",
+      badge: "Шаг 7 из 14 • Алматы",
       title: "Глава 5: В горах с друзьями",
       desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
-      img: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800&auto=format&fit=crop",
+      img: "https://i.postimg.cc/Twdg8f0f/IMG-7698.jpg",
       question: "Главный ингредиент идеального похода в горы?",
       options: [
         { text: "Надежные друзья и уют у огня", correct: true }
       ]
     },
     {
-      badge: "Шаг 6 из 12 • Праздник",
+      badge: "Шаг 8 из 14 • Праздник",
       title: "Тот самый день💍",
       desc: "Соберите пазл, чтобы восстановить самый важный кадр!",
       img: "https://i.postimg.cc/Qd3qJDDc/IMG-7670.jpg",
