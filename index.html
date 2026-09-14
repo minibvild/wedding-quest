@@ -111,7 +111,7 @@
       display: block;
     }
 
-    /* Полноэкранный текстовый блок для transition-экрана */
+    /* Полноэкранный текстовый блок для transition-экранов */
     .intro-text-block {
       flex: 1;
       display: flex;
@@ -381,6 +381,12 @@
 
   // Массив всех шагов квеста
   const steps = [
+    // Вводный экран перед всем квестом
+    {
+      isIntroText: true,
+      text: "Начало истории:",
+      btnText: "Начать ✨"
+    },
     {
       badge: "Шаг 1 из 14 • Уральск",
       title: "Глава 1: Первое чувство",
@@ -449,7 +455,7 @@
     },
     {
       badge: "Шаг 7 из 14 • Алматы",
-      title: "Глава 5: В горах с друзьями",
+      title: "Глава 5: В горах",
       desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
       img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg",
       question: "Главный ингредиент идеального похода в горы?",
@@ -678,7 +684,7 @@
     const giftCardArea = document.getElementById('giftCardArea');
     const interactiveArea = document.getElementById('interactiveArea');
 
-    // 0. РЕЖИМ ПЕРЕХОДНОГО ТЕКСТОВОГО ЭКРАНА (Центрирован)
+    // 0. РЕЖИМ ПЕРЕХОДНОГО / СТАРТОВОГО ТЕКСТОВОГО ЭКРАНА (Центрирован)
     if (data.isIntroText) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
