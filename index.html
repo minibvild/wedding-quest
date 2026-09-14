@@ -91,22 +91,23 @@
     /* Карточка с иллюстрацией (Квест и Сертификаты) */
     .media-card {
       width: 100%;
-      flex: 1;
-      max-height: 280px;
-      min-height: 180px;
+      height: 280px;
       margin: 12px 0;
       border-radius: 20px;
       overflow: hidden;
       position: relative;
-      background: #1c1c1e;
+      background: #000000;
       border: 1px solid var(--card-border);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .media-card img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
@@ -439,7 +440,7 @@
       badge: "Шаг 6 из 14 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
-      img: "https://i.postimg.cc/9Fm8q7Rz/IMG-7694.jpg",
+      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
       question: "Какая атмосфера царила в тот незабываемый момент?",
       options: [
         { text: "Волшебный закат и полная гармония", correct: true },
@@ -755,7 +756,7 @@
 
     // 3. РЕЖИМ СЕРТИФИКАТА
     if (data.isCertificate) {
-      mediaCardContainer.style.display = 'block';
+      mediaCardContainer.style.display = 'flex';
       puzzleArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       document.getElementById('stepImg').src = data.img;
@@ -770,7 +771,7 @@
     }
 
     // 4. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
-    mediaCardContainer.style.display = 'block';
+    mediaCardContainer.style.display = 'flex';
     puzzleArea.style.display = 'none';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
