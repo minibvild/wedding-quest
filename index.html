@@ -390,6 +390,31 @@
       opacity: 0.3;
       pointer-events: none;
     }
+
+    /* Стили для игры "Погладь Чипса" */
+    .cat-pet-container {
+      width: 100%;
+      height: 280px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin: 12px 0;
+    }
+
+    .cat-img {
+      max-width: 90%;
+      max-height: 260px;
+      object-fit: contain;
+      cursor: pointer;
+      touch-action: none;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+      transition: transform 0.1s ease;
+    }
+
+    .cat-img:active {
+      transform: scale(1.03);
+    }
   </style>
 </head>
 <body>
@@ -398,7 +423,7 @@
   <div class="fade-wrapper" id="fadeWrapper">
     <!-- Шапка -->
     <div class="header" id="headerBlock">
-      <span class="step-badge" id="stepBadge">Шаг 1 из 15</span>
+      <span class="step-badge" id="stepBadge">Шаг 1 из 16</span>
       <h1 class="title" id="stepTitle">Заголовок</h1>
       <p class="description" id="stepDesc">Описание шага...</p>
     </div>
@@ -424,6 +449,13 @@
           <div class="table-part-target leg" id="target-leg4" style="top: 74px; left: 78%; width: 16px; height: 100px;"></div>
         </div>
         <div class="parts-inventory" id="partsInventory"></div>
+      </div>
+    </div>
+
+    <!-- Область для игры "Погладь Чипса" -->
+    <div id="catPetArea" style="display: none; width: 100%;">
+      <div class="cat-pet-container">
+        <img id="chipsCatImg" class="cat-img" src="" alt="Кот Чипс">
       </div>
     </div>
 
@@ -470,7 +502,7 @@
       btnText: "Начать ✨"
     },
     {
-      badge: "Шаг 1 из 15 • Уральск",
+      badge: "Шаг 1 из 16 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
       img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
@@ -482,7 +514,7 @@
       ]
     },
     {
-      badge: "Шаг 2 из 15 • Воспоминания",
+      badge: "Шаг 2 из 16 • Воспоминания",
       title: "Глава 2: Вдали друг от друга",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
       img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg",
@@ -492,7 +524,7 @@
       ]
     },
     {
-      badge: "Шаг 3 из 15 • Расстояние",
+      badge: "Шаг 3 из 16 • Расстояние",
       title: "Уфа ↔ Самара",
       desc: "",
       img: "https://i.postimg.cc/wMhrfvsp/IMG-7669.jpg",
@@ -504,7 +536,7 @@
       ]
     },
     {
-      badge: "Шаг 4 из 15 • Дом",
+      badge: "Шаг 4 из 16 • Дом",
       title: "Глава 3: Вместе в Самаре",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
       img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg",
@@ -515,7 +547,7 @@
       ]
     },
     {
-      badge: "Шаг 5 из 15 • Уют",
+      badge: "Шаг 5 из 16 • Уют",
       title: "Тёплые моменты",
       desc: "Когда дом наполняется радостью и общими мечтами.",
       img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
@@ -529,12 +561,20 @@
     {
       badge: "Мастерская 🛠️",
       title: "Артём, собери стол",
-      desc: "Нажимай на детали по очереди, чтобы собрать новый стол для дома!",
+      desc: "Сначала закрепи все 4 ножки, и только потом ставь столешницу!",
       isTableGame: true
     },
 
+    /* СТРАНИЦА "ПОГЛАДЬ ЧИПСА" */
     {
-      badge: "Шаг 6 из 15 • Манила",
+      badge: "Пушистый перерыв 🐾",
+      title: "а теперь погладь чипса",
+      desc: "Проведи пальцем по Чипсу, чтобы услышать, как он мурчит!",
+      isCatPet: true
+    },
+
+    {
+      badge: "Шаг 6 из 16 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
       img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
@@ -545,7 +585,7 @@
       ]
     },
     {
-      badge: "Шаг 7 из 15 • Алматы",
+      badge: "Шаг 7 из 16 • Алматы",
       title: "Глава 5: В горах",
       desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
       img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg",
@@ -555,7 +595,7 @@
       ]
     },
     {
-      badge: "Шаг 8 из 15 • Праздник",
+      badge: "Шаг 8 из 16 • Праздник",
       title: "Тот самый день💍",
       desc: "Соберите пазл, чтобы восстановить самый важный кадр!",
       img: "https://i.postimg.cc/Qd3qJDDc/IMG-7670.jpg",
@@ -696,44 +736,140 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
-  // Логика сборки Стола
+  // Логика сборки Стола (с проверкой порядка)
   function initTableGame() {
     const partsContainer = document.getElementById('partsInventory');
-    partsContainer.innerHTML = '';
     
-    // Сброс всех целей
-    document.querySelectorAll('.table-part-target').forEach(t => t.classList.remove('placed'));
+    function resetTable() {
+      partsContainer.innerHTML = '';
+      document.querySelectorAll('.table-part-target').forEach(t => t.classList.remove('placed'));
 
-    const parts = [
-      { id: 'leg1', name: 'Левая ножка 🦵' },
-      { id: 'leg2', name: 'Задняя ножка 🦵' },
-      { id: 'leg3', name: 'Задняя ножка 🦵' },
-      { id: 'leg4', name: 'Правая ножка 🦵' },
-      { id: 'top', name: 'Столешница 🪵' }
-    ];
+      const parts = [
+        { id: 'leg1', type: 'leg', name: 'Ножка 1 🦵' },
+        { id: 'leg2', type: 'leg', name: 'Ножка 2 🦵' },
+        { id: 'top', type: 'top', name: 'Столешница 🪵' },
+        { id: 'leg3', type: 'leg', name: 'Ножка 3 🦵' },
+        { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵' }
+      ];
 
-    let placedCount = 0;
+      // Перемешиваем детали для азарта
+      parts.sort(() => Math.random() - 0.5);
 
-    parts.forEach(part => {
-      const btn = document.createElement('button');
-      btn.className = 'part-btn';
-      btn.innerText = part.name;
-      btn.onclick = () => {
-        const target = document.getElementById(`target-${part.id}`);
-        if (target && !target.classList.contains('placed')) {
-          target.classList.add('placed');
-          btn.classList.add('disabled');
-          placedCount++;
+      let placedLegsCount = 0;
 
-          if (placedCount === parts.length) {
-            triggerPopPopper();
-            const nextBtn = document.getElementById('nextBtn');
-            if (nextBtn) nextBtn.classList.add('visible');
+      parts.forEach(part => {
+        const btn = document.createElement('button');
+        btn.className = 'part-btn';
+        btn.innerText = part.name;
+
+        btn.onclick = () => {
+          if (part.type === 'top') {
+            if (placedLegsCount < 4) {
+              alert('Ошибка! Сначала нужно установить все 4 ножки, иначе стол упадет! Сборка начинается заново 🛠️');
+              resetTable();
+              return;
+            } else {
+              const target = document.getElementById(`target-top`);
+              target.classList.add('placed');
+              btn.classList.add('disabled');
+              triggerPopPopper();
+              const nextBtn = document.getElementById('nextBtn');
+              if (nextBtn) nextBtn.classList.add('visible');
+            }
+          } else {
+            const target = document.getElementById(`target-${part.id}`);
+            if (target && !target.classList.contains('placed')) {
+              target.classList.add('placed');
+              btn.classList.add('disabled');
+              placedLegsCount++;
+            }
           }
+        };
+        partsContainer.appendChild(btn);
+      });
+    }
+
+    resetTable();
+  }
+
+  // Звук мурлыканья через Web Audio API
+  let purrAudioCtx = null;
+  let purrOsc = null;
+  let purrGain = null;
+
+  function startPurr() {
+    if (!purrAudioCtx) {
+      purrAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (purrAudioCtx.state === 'suspended') {
+      purrAudioCtx.resume();
+    }
+    if (!purrOsc) {
+      purrOsc = purrAudioCtx.createOscillator();
+      purrGain = purrAudioCtx.createGain();
+
+      purrOsc.type = 'sawtooth';
+      purrOsc.frequency.setValueAtTime(45, purrAudioCtx.currentTime); // Низкий кот-частотный гул
+
+      // Модуляция вибрирования (мурчания)
+      const lfo = purrAudioCtx.createOscillator();
+      const lfoGain = purrAudioCtx.createGain();
+      lfo.frequency.setValueAtTime(25, purrAudioCtx.currentTime);
+      lfoGain.gain.setValueAtTime(15, purrAudioCtx.currentTime);
+
+      lfo.connect(purrOsc.frequency);
+      lfo.start();
+
+      purrGain.gain.setValueAtTime(0.08, purrAudioCtx.currentTime);
+
+      purrOsc.connect(purrGain);
+      purrGain.connect(purrAudioCtx.destination);
+      purrOsc.start();
+    }
+  }
+
+  function stopPurr() {
+    if (purrAudioCtx && purrGain) {
+      purrGain.gain.setTargetAtTime(0, purrAudioCtx.currentTime, 0.05);
+      setTimeout(() => {
+        if (purrOsc) {
+          purrOsc.stop();
+          purrOsc.disconnect();
+          purrOsc = null;
         }
-      };
-      partsContainer.appendChild(btn);
-    });
+      }, 100);
+    }
+  }
+
+  // Логика "Погладь Чипса"
+  function initCatPet() {
+    const catImg = document.getElementById('chipsCatImg');
+    let petProgress = 0;
+
+    const handlePet = () => {
+      startPurr();
+      if (navigator.vibrate) navigator.vibrate(40);
+
+      petProgress++;
+      if (petProgress > 15) {
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) nextBtn.classList.add('visible');
+      }
+    };
+
+    const handleStop = () => {
+      stopPurr();
+    };
+
+    catImg.addEventListener('mousemove', handlePet);
+    catImg.addEventListener('mouseleave', handleStop);
+
+    catImg.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      handlePet();
+    }, { passive: false });
+
+    catImg.addEventListener('touchend', handleStop);
   }
 
   // Логика сборки Пазла 4x5
@@ -743,7 +879,6 @@
     puzzleContainer.classList.remove('solved');
     
     let pieces = Array.from({ length: 20 }, (_, i) => i);
-    // Перемешивание кусочков
     do {
       pieces.sort(() => Math.random() - 0.5);
     } while (isPuzzleSolved(pieces));
@@ -779,7 +914,6 @@
             } else if (selectedIndex === currentIndex) {
               selectedIndex = null;
             } else {
-              // Обмен местами элементов
               const temp = pieces[selectedIndex];
               pieces[selectedIndex] = pieces[currentIndex];
               pieces[currentIndex] = temp;
@@ -811,17 +945,19 @@
     const mediaCardContainer = document.getElementById('mediaCardContainer');
     const puzzleArea = document.getElementById('puzzleArea');
     const tableGameArea = document.getElementById('tableGameArea');
+    const catPetArea = document.getElementById('catPetArea');
     const introTextBlock = document.getElementById('introTextBlock');
     const kissScreen = document.getElementById('kissScreen');
     const giftCardArea = document.getElementById('giftCardArea');
     const interactiveArea = document.getElementById('interactiveArea');
 
-    // 0. РЕЖИМ ПЕРЕХОДНОГО / СТАРТОВОГО ТЕКСТОВОГО ЭКРАНА (Центрирован)
+    // 0. РЕЖИМ ПЕРЕХОДНОГО / СТАРТОВОГО ТЕКСТОВОГО ЭКРАНА
     if (data.isIntroText) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       kissScreen.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -840,6 +976,7 @@
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       introTextBlock.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -848,7 +985,7 @@
       return;
     }
 
-    // Возвращаем видимость основных элементов для обычных шагов
+    // Возвращаем видимость основных элементов
     headerBlock.style.display = 'flex';
     introTextBlock.style.display = 'none';
     kissScreen.style.display = 'none';
@@ -862,6 +999,7 @@
     if (data.isTableGame) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       tableGameArea.style.display = 'block';
 
@@ -873,10 +1011,27 @@
       return;
     }
 
-    // 2. РЕЖИМ ПАЗЛА
+    // 2. РЕЖИМ МИНИ-ИГРЫ "ПОГЛАДЬ ЧИПСА"
+    if (data.isCatPet) {
+      mediaCardContainer.style.display = 'none';
+      puzzleArea.style.display = 'none';
+      tableGameArea.style.display = 'none';
+      giftCardArea.style.display = 'none';
+      catPetArea.style.display = 'flex';
+
+      interactiveArea.innerHTML = `
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
+
+      initCatPet();
+      return;
+    }
+
+    // 3. РЕЖИМ ПАЗЛА
     if (data.isPuzzle) {
       mediaCardContainer.style.display = 'none';
       tableGameArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       puzzleArea.style.display = 'block';
 
@@ -890,11 +1045,12 @@
       return;
     }
 
-    // 3. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
+    // 4. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
     if (data.isScratch) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'block';
 
       const giftImg = document.getElementById('giftImg');
@@ -911,11 +1067,12 @@
       return;
     }
 
-    // 4. РЕЖИМ СЕРТИФИКАТА
+    // 5. РЕЖИМ СЕРТИФИКАТА
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'flex';
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
+      catPetArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       document.getElementById('stepImg').src = data.img;
 
@@ -928,10 +1085,11 @@
       return;
     }
 
-    // 5. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
+    // 6. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
     mediaCardContainer.style.display = 'flex';
     puzzleArea.style.display = 'none';
     tableGameArea.style.display = 'none';
+    catPetArea.style.display = 'none';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
 
@@ -965,6 +1123,7 @@
   }
 
   function nextStep() {
+    stopPurr();
     if (currentStep < steps.length - 1) {
       const wrapper = document.getElementById('fadeWrapper');
       wrapper.classList.add('fade-out');
