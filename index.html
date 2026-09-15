@@ -455,7 +455,7 @@
     <!-- Область для игры "Погладь Чипса" -->
     <div id="catPetArea" style="display: none; width: 100%;">
       <div class="cat-pet-container">
-        <img id="chipsCatImg" class="cat-img" src="https://i.postimg.cc/fL9cQH7T/IMG-7719.jpg" alt="Кот Чипс">
+        <img id="chipsCatImg" class="cat-img" src="https://i.postimg.cc/Ss6nGH7t/IMG-7720.png" alt="Кот Чипс">
       </div>
     </div>
 
@@ -493,10 +493,9 @@
     window.Telegram.WebApp.expand();
   }
 
-  // Аудио-контекст Web Audio API с разблокировкой по клику
+  // Настройка звука мурлыканья через Web Audio API
   let audioCtx = null;
-  let purrOsc = null;
-  let purrGain = null;
+  let purrNodes = null;
 
   function initAudioContext() {
     if (!audioCtx) {
@@ -510,58 +509,77 @@
     }
   }
 
-  // Разблокируем звук при любом касании экрана пользователем
-  window.addEventListener('touchstart', initAudioContext, { once: true });
-  window.addEventListener('mousedown', initAudioContext, { once: true });
+  // Глобальная разблокировка звукового контекста при любых действиях пользователя
+  ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, initAudioContext, { passive: true });
+  });
 
-  // Запуск синтеза звука мурлыканья
+  // Запуск синтеза звука мурлыканья (адаптирован для динамиков мобильных устройств)
   function startPurr() {
     initAudioContext();
     if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
 
-    if (!purrOsc) {
-      try {
-        purrOsc = audioCtx.createOscillator();
-        purrGain = audioCtx.createGain();
+    if (purrNodes) return; // Ужe играет
 
-        // Низкая несущая частота для эффекта урчания
-        purrOsc.type = 'sawtooth';
-        purrOsc.frequency.setValueAtTime(50, audioCtx.currentTime);
+    try {
+      // Частоты, отлично слышимые на динамиках мобильных телефонов (110Гц и 165Гц)
+      const osc1 = audioCtx.createOscillator();
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(110, audioCtx.currentTime);
 
-        // LFO (Низкочастотный осциллятор) для ритмичного вибрирования
-        const lfo = audioCtx.createOscillator();
-        const lfoGain = audioCtx.createGain();
-        lfo.frequency.setValueAtTime(22, audioCtx.currentTime);
-        lfoGain.gain.setValueAtTime(20, audioCtx.currentTime);
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(165, audioCtx.currentTime);
 
-        lfo.connect(purrOsc.frequency);
-        lfo.start();
+      // Фильтр высоких частот для более тёплого кошачьего звука
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(450, audioCtx.currentTime);
 
-        // Небольшая громкость
-        purrGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      // Амплитудная модуляция (LFO 24 Гц) - создаёт эффект вибрации/урчания
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
 
-        purrOsc.connect(purrGain);
-        purrGain.connect(audioCtx.destination);
-        purrOsc.start();
-      } catch (e) {
-        console.log('Audio start error:', e);
-      }
+      const lfo = audioCtx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.setValueAtTime(24, audioCtx.currentTime);
+
+      const lfoGain = audioCtx.createGain();
+      lfoGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+
+      lfo.connect(masterGain.gain);
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(masterGain);
+      masterGain.connect(audioCtx.destination);
+
+      osc1.start();
+      osc2.start();
+      lfo.start();
+
+      purrNodes = { osc1, osc2, lfo, masterGain };
+    } catch (e) {
+      console.log('Purr audio error:', e);
     }
   }
 
   function stopPurr() {
-    if (audioCtx && purrGain) {
+    if (purrNodes && audioCtx) {
       try {
-        purrGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+        purrNodes.masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+        const activeNodes = purrNodes;
+        purrNodes = null;
         setTimeout(() => {
-          if (purrOsc) {
-            purrOsc.stop();
-            purrOsc.disconnect();
-            purrOsc = null;
-          }
+          activeNodes.osc1.stop();
+          activeNodes.osc2.stop();
+          activeNodes.lfo.stop();
+          activeNodes.osc1.disconnect();
+          activeNodes.osc2.disconnect();
+          activeNodes.lfo.disconnect();
         }, 100);
       } catch (e) {
-        console.log('Audio stop error:', e);
+        purrNodes = null;
       }
     }
   }
@@ -802,7 +820,7 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
-  // Сборка стола
+  // Игра "Сборка стола" с перемешиванием невыбранных ножек
   function initTableGame() {
     const partsContainer = document.getElementById('partsInventory');
     
@@ -810,47 +828,67 @@
       partsContainer.innerHTML = '';
       document.querySelectorAll('.table-part-target').forEach(t => t.classList.remove('placed'));
 
-      const parts = [
-        { id: 'leg1', type: 'leg', name: 'Ножка 1 🦵' },
-        { id: 'leg2', type: 'leg', name: 'Ножка 2 🦵' },
-        { id: 'top', type: 'top', name: 'Столешница 🪵' },
-        { id: 'leg3', type: 'leg', name: 'Ножка 3 🦵' },
-        { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵' }
+      let parts = [
+        { id: 'leg1', type: 'leg', name: 'Ножка 1 🦵', placed: false },
+        { id: 'leg2', type: 'leg', name: 'Ножка 2 🦵', placed: false },
+        { id: 'top', type: 'top', name: 'Столешница 🪵', placed: false },
+        { id: 'leg3', type: 'leg', name: 'Ножка 3 🦵', placed: false },
+        { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵', placed: false }
       ];
 
+      // Первоначальное перемешивание
       parts.sort(() => Math.random() - 0.5);
       let placedLegsCount = 0;
 
-      parts.forEach(part => {
-        const btn = document.createElement('button');
-        btn.className = 'part-btn';
-        btn.innerText = part.name;
+      function renderButtons() {
+        partsContainer.innerHTML = '';
 
-        btn.onclick = () => {
-          if (part.type === 'top') {
-            if (placedLegsCount < 4) {
-              alert('Ошибка! Сначала нужно установить все 4 ножки, иначе стол упадет! Сборка начинается заново 🛠️');
-              resetTable();
-              return;
+        parts.forEach(part => {
+          const btn = document.createElement('button');
+          btn.className = 'part-btn' + (part.placed ? ' disabled' : '');
+          btn.innerText = part.name;
+
+          btn.onclick = () => {
+            if (part.placed) return;
+
+            if (part.type === 'top') {
+              if (placedLegsCount < 4) {
+                alert('Ошибка! Сначала нужно установить все 4 ножки, иначе стол упадет! Сборка начинается заново 🛠️');
+                resetTable();
+                return;
+              } else {
+                part.placed = true;
+                const target = document.getElementById(`target-top`);
+                if (target) target.classList.add('placed');
+                triggerPopPopper();
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) nextBtn.classList.add('visible');
+                renderButtons();
+              }
             } else {
-              const target = document.getElementById(`target-top`);
-              target.classList.add('placed');
-              btn.classList.add('disabled');
-              triggerPopPopper();
-              const nextBtn = document.getElementById('nextBtn');
-              if (nextBtn) nextBtn.classList.add('visible');
-            }
-          } else {
-            const target = document.getElementById(`target-${part.id}`);
-            if (target && !target.classList.contains('placed')) {
-              target.classList.add('placed');
-              btn.classList.add('disabled');
+              // Устанавливаем выбранную ножку
+              part.placed = true;
+              const target = document.getElementById(`target-${part.id}`);
+              if (target) target.classList.add('placed');
               placedLegsCount++;
+
+              // Перемешиваем случайным образом все оставшиеся неустановленные элементы!
+              shuffleUnplacedParts();
+              renderButtons();
             }
-          }
-        };
-        partsContainer.appendChild(btn);
-      });
+          };
+          partsContainer.appendChild(btn);
+        });
+      }
+
+      function shuffleUnplacedParts() {
+        const unplaced = parts.filter(p => !p.placed);
+        unplaced.sort(() => Math.random() - 0.5);
+        let idx = 0;
+        parts = parts.map(p => p.placed ? p : unplaced[idx++]);
+      }
+
+      renderButtons();
     }
 
     resetTable();
@@ -863,10 +901,12 @@
 
     const handlePet = () => {
       startPurr();
-      if (navigator.vibrate) navigator.vibrate(40);
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
 
       petProgress++;
-      if (petProgress > 12) {
+      if (petProgress > 10) {
         const nextBtn = document.getElementById('nextBtn');
         if (nextBtn) nextBtn.classList.add('visible');
       }
