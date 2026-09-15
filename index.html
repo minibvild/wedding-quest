@@ -111,6 +111,19 @@
       display: block;
     }
 
+    /* Стиль без подгона карточки (Шаг 7) */
+    .media-card.no-fit {
+      height: auto;
+      max-height: 320px;
+      background: transparent;
+    }
+
+    .media-card.no-fit img {
+      height: auto;
+      max-height: 320px;
+      object-fit: contain;
+    }
+
     /* Полноэкранный текстовый блок для transition-экранов */
     .intro-text-block {
       flex: 1;
@@ -562,7 +575,7 @@
     currentPurrIndex = (currentPurrIndex + 1) % purrAudioElements.length;
   }
 
-  // Остановка воспроизведения (immediate = true выключает звук моментально)
+  // Остановка воспроизведения
   function stopPurr(immediate = false) {
     if (fadeInterval) {
       clearInterval(fadeInterval);
@@ -614,13 +627,18 @@
       badge: "Шаг 1 из 16 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
-      img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg"
+      img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
+      question: "Помнишь ли ты, где произошло то самое знакомство?"
     },
     {
       badge: "Шаг 2 из 16 • Воспоминания",
       title: "Глава 2: Вдали друг от друга",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
-      img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg"
+      img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg",
+      question: "Готовы двигаться дальше сквозь километры?",
+      options: [
+        { text: "Да, поехали дальше! ✨", correct: true }
+      ]
     },
     {
       badge: "Шаг 3 из 16 • Расстояние",
@@ -638,13 +656,15 @@
       badge: "Шаг 4 из 16 • Дом",
       title: "снова вместе",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
-      img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg"
+      img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg",
+      question: "Что помогло быстрее всего обустроить ваш уют?"
     },
     {
       badge: "Шаг 5 из 16 • Уют",
       title: "Упс)))))",
       desc: "не все было сразу",
-      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg"
+      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
+      question: "Впереди самые яркие путешествия!"
     },
 
     /* СТРАНИЦА "АРТЁМ, СОБЕРИ СТОЛ" */
@@ -667,13 +687,15 @@
       badge: "Шаг 6 из 16 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
-      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg"
+      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
+      question: "Какая атмосфера царила в тот незабываемый момент?"
     },
     {
       badge: "Шаг 7 из 16 • Алматы",
       title: "Глава 5: В горах",
       desc: "приятные воспоминания)))",
-      img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg"
+      img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg",
+      noFitImg: true
     },
     {
       badge: "Шаг 8 из 16 • Праздник",
@@ -1150,6 +1172,7 @@
 
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'flex';
+      mediaCardContainer.classList.remove('no-fit');
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
       catPetArea.style.display = 'none';
@@ -1166,21 +1189,27 @@
     }
 
     mediaCardContainer.style.display = 'flex';
+    if (data.noFitImg) {
+      mediaCardContainer.classList.add('no-fit');
+    } else {
+      mediaCardContainer.classList.remove('no-fit');
+    }
+
     puzzleArea.style.display = 'none';
     tableGameArea.style.display = 'none';
     catPetArea.style.display = 'none';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
 
-    // Обычные шаги с вопросами или без них
-    if (data.options) {
+    // Режим работы блока вопросов/вариантов
+    if (data.options && data.options.length > 0) {
       interactiveArea.innerHTML = `
         <div class="question" id="stepQuestion"></div>
         <div class="options" id="optionsContainer"></div>
         <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
       `;
 
-      document.getElementById('stepQuestion').innerText = data.question;
+      document.getElementById('stepQuestion').innerText = data.question || '';
       const optionsContainer = document.getElementById('optionsContainer');
       const nextBtn = document.getElementById('nextBtn');
 
@@ -1201,6 +1230,12 @@
         };
         optionsContainer.appendChild(btn);
       });
+    } else if (data.question) {
+      interactiveArea.innerHTML = `
+        <div class="question" id="stepQuestion"></div>
+        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
+      document.getElementById('stepQuestion').innerText = data.question;
     } else {
       interactiveArea.innerHTML = `
         <button class="next-btn visible" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
