@@ -111,13 +111,6 @@
       display: block;
     }
 
-    /* Без рамок и теней (Шаг 1) */
-    .media-card.frameless {
-      border: none !important;
-      box-shadow: none !important;
-      background: transparent !important;
-    }
-
     /* Стиль без подгона карточки (Шаг 7) */
     .media-card.no-fit {
       height: auto;
@@ -635,8 +628,7 @@
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
       img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
-      question: "Помнишь ли ты, где произошло то самое знакомство?",
-      framelessImg: true
+      question: "Помнишь ли ты, где произошло то самое знакомство?"
     },
     {
       badge: "Шаг 2 из 16 • Воспоминания",
@@ -671,7 +663,8 @@
       badge: "Шаг 5 из 16 • Уют",
       title: "Упс)))))",
       desc: "не все было сразу",
-      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg"
+      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
+      question: "Впереди самые яркие путешествия!"
     },
 
     /* СТРАНИЦА "АРТЁМ, СОБЕРИ СТОЛ" */
@@ -693,8 +686,9 @@
     {
       badge: "Шаг 6 из 16 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
-      desc: "Ночная Манила, звездное небо и самый важный ответ 💍",
-      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg"
+      desc: "Ночной океан, звездное небо и самый важный ответ 💍",
+      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
+      question: "Какая атмосфера царила в тот незабываемый момент?"
     },
     {
       badge: "Шаг 7 из 16 • Алматы",
@@ -1178,7 +1172,7 @@
 
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'flex';
-      mediaCardContainer.classList.remove('no-fit', 'frameless');
+      mediaCardContainer.classList.remove('no-fit');
       puzzleArea.style.display = 'none';
       tableGameArea.style.display = 'none';
       catPetArea.style.display = 'none';
@@ -1195,13 +1189,6 @@
     }
 
     mediaCardContainer.style.display = 'flex';
-
-    if (data.framelessImg) {
-      mediaCardContainer.classList.add('frameless');
-    } else {
-      mediaCardContainer.classList.remove('frameless');
-    }
-
     if (data.noFitImg) {
       mediaCardContainer.classList.add('no-fit');
     } else {
