@@ -107,7 +107,7 @@
     .media-card img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       display: block;
     }
 
@@ -541,7 +541,6 @@
 
   // Поочередный запуск воспроизведения
   function startPurr() {
-    // Воспроизводим звук ТОЛЬКО на шаге с котиком и ТОЛЬКО при активном контакте
     if (steps[currentStep] && !steps[currentStep].isCatPet) return;
     if (!isInteractingWithCat) return;
 
@@ -615,23 +614,13 @@
       badge: "Шаг 1 из 16 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
-      img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
-      question: "Помнишь ли ты, где произошло то самое знакомство?",
-      options: [
-        { text: "На прогулке с общими друзьями", correct: true },
-        { text: "В уютном кафе у дома", correct: false },
-        { text: "Случайно на улице", correct: false }
-      ]
+      img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg"
     },
     {
       badge: "Шаг 2 из 16 • Воспоминания",
       title: "Глава 2: Вдали друг от друга",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
-      img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg",
-      question: "Готовы двигаться дальше сквозь километры?",
-      options: [
-        { text: "Да, поехали дальше! ✨", correct: true }
-      ]
+      img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg"
     },
     {
       badge: "Шаг 3 из 16 • Расстояние",
@@ -647,24 +636,15 @@
     },
     {
       badge: "Шаг 4 из 16 • Дом",
-      title: "Глава 3: Вместе в Самаре",
+      title: "снова вместе",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
-      img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg",
-      question: "Что помогло быстрее всего обустроить ваш уют?",
-      options: [
-        { text: "Тёплые беседы, душевный чай и забота", correct: true },
-        { text: "Бесконечные споры о бытовых мелочах", correct: false }
-      ]
+      img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg"
     },
     {
       badge: "Шаг 5 из 16 • Уют",
-      title: "Тёплые моменты",
-      desc: "Когда дом наполняется радостью и общими мечтами.",
-      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
-      question: "Впереди самые яркие путешествия!",
-      options: [
-        { text: "К новым горизонтам! 🌊", correct: true }
-      ]
+      title: "Упс)))))",
+      desc: "не все было сразу",
+      img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg"
     },
 
     /* СТРАНИЦА "АРТЁМ, СОБЕРИ СТОЛ" */
@@ -687,22 +667,13 @@
       badge: "Шаг 6 из 16 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
-      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
-      question: "Какая атмосфера царила в тот незабываемый момент?",
-      options: [
-        { text: "Волшебный закат и полная гармония", correct: true },
-        { text: "Легкий экспромт и океан эмоций", correct: true }
-      ]
+      img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg"
     },
     {
       badge: "Шаг 7 из 16 • Алматы",
       title: "Глава 5: В горах",
-      desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
-      img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg",
-      question: "Главный ингредиент идеального похода в горы?",
-      options: [
-        { text: "Надежные друзья и уют у огня", correct: true }
-      ]
+      desc: "приятные воспоминания)))",
+      img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg"
     },
     {
       badge: "Шаг 8 из 16 • Праздник",
@@ -856,7 +827,6 @@
         { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵', placed: false }
       ];
 
-      // Начальный случайный перемес
       parts.sort(() => Math.random() - 0.5);
       let placedLegsCount = 0;
 
@@ -899,7 +869,6 @@
         });
       }
 
-      // Функция перемешивания, гарантирующая смену позиции столешницы
       function shuffleUnplacedParts() {
         const unplaced = parts.filter(p => !p.placed);
         if (unplaced.length <= 1) return;
@@ -1050,7 +1019,6 @@
   }
 
   function renderStep() {
-    // При переключении любого шага отключаем все аудио со сбросом
     isInteractingWithCat = false;
     stopPurr(true);
 
@@ -1204,33 +1172,40 @@
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
 
-    interactiveArea.innerHTML = `
-      <div class="question" id="stepQuestion"></div>
-      <div class="options" id="optionsContainer"></div>
-      <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
-    `;
+    // Обычные шаги с вопросами или без них
+    if (data.options) {
+      interactiveArea.innerHTML = `
+        <div class="question" id="stepQuestion"></div>
+        <div class="options" id="optionsContainer"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
 
-    document.getElementById('stepQuestion').innerText = data.question;
-    const optionsContainer = document.getElementById('optionsContainer');
-    const nextBtn = document.getElementById('nextBtn');
+      document.getElementById('stepQuestion').innerText = data.question;
+      const optionsContainer = document.getElementById('optionsContainer');
+      const nextBtn = document.getElementById('nextBtn');
 
-    data.options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-option';
-      btn.innerText = opt.text;
-      btn.onclick = () => {
-        const allBtns = optionsContainer.querySelectorAll('.btn-option');
-        allBtns.forEach(b => b.disabled = true);
-        
-        if (opt.correct) {
-          btn.classList.add('correct');
-        } else {
-          btn.classList.add('wrong');
-        }
-        nextBtn.classList.add('visible');
-      };
-      optionsContainer.appendChild(btn);
-    });
+      data.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.innerText = opt.text;
+        btn.onclick = () => {
+          const allBtns = optionsContainer.querySelectorAll('.btn-option');
+          allBtns.forEach(b => b.disabled = true);
+          
+          if (opt.correct) {
+            btn.classList.add('correct');
+          } else {
+            btn.classList.add('wrong');
+          }
+          nextBtn.classList.add('visible');
+        };
+        optionsContainer.appendChild(btn);
+      });
+    } else {
+      interactiveArea.innerHTML = `
+        <button class="next-btn visible" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
+    }
   }
 
   function nextStep() {
