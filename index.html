@@ -323,43 +323,59 @@
       z-index: 2;
     }
 
-    /* Стили для игры "Собери стол" */
+    /* Стили для обновленной светлой игры "Собери стол" */
     .table-game-container {
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
+      gap: 16px;
       margin: 10px 0;
     }
 
     .table-canvas {
       width: 100%;
-      height: 220px;
-      background: #1c1c1e;
-      border: 1px dashed rgba(255,255,255,0.2);
-      border-radius: 16px;
+      height: 230px;
+      background: linear-gradient(180deg, #f7f3ed 0%, #ede6db 100%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 20px;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Легкая фоновая сетка чертежа */
+    .table-canvas::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+      background-size: 16px 16px;
+      pointer-events: none;
     }
 
     .table-part-target {
       position: absolute;
-      border: 2px dashed rgba(255,255,255,0.3);
-      border-radius: 6px;
-      transition: all 0.3s ease;
+      border: 2px dashed rgba(160, 140, 120, 0.4);
+      border-radius: 8px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       box-sizing: border-box;
     }
 
-    .table-part-target.placed {
-      background: #8b5a2b;
-      border: 1px solid #6d421e;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    /* Установленная ножка стола (Светлое дерево) */
+    .table-part-target.leg.placed {
+      background: linear-gradient(90deg, #d4b08c 0%, #e6cbab 50%, #c49f7b 100%);
+      border: 1px solid #b38b68;
+      border-radius: 6px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
+    /* Установленная столешница (Светлый скандинавский дуб) */
     .table-part-target.top.placed {
-      background: #a67c52;
-      border: 1px solid #7d5935;
+      background: linear-gradient(180deg, #f0dfcc 0%, #dec4a6 100%);
+      border: 1.5px solid #c4a482;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.6);
     }
 
     .parts-inventory {
@@ -371,15 +387,16 @@
     }
 
     .part-btn {
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       color: var(--text-main);
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(10px);
     }
 
     .part-btn:active {
@@ -387,7 +404,7 @@
     }
 
     .part-btn.disabled {
-      opacity: 0.3;
+      opacity: 0.25;
       pointer-events: none;
     }
 
@@ -442,11 +459,11 @@
     <div id="tableGameArea" style="display: none; width: 100%; margin: 12px 0;">
       <div class="table-game-container">
         <div class="table-canvas">
-          <div class="table-part-target top" id="target-top" style="top: 50px; left: 15%; width: 70%; height: 24px;"></div>
-          <div class="table-part-target leg" id="target-leg1" style="top: 74px; left: 18%; width: 16px; height: 100px;"></div>
-          <div class="table-part-target leg" id="target-leg2" style="top: 74px; left: 35%; width: 16px; height: 90px;"></div>
-          <div class="table-part-target leg" id="target-leg3" style="top: 74px; left: 62%; width: 16px; height: 90px;"></div>
-          <div class="table-part-target leg" id="target-leg4" style="top: 74px; left: 78%; width: 16px; height: 100px;"></div>
+          <div class="table-part-target top" id="target-top" style="top: 55px; left: 12%; width: 76%; height: 26px;"></div>
+          <div class="table-part-target leg" id="target-leg1" style="top: 81px; left: 16%; width: 14px; height: 95px;"></div>
+          <div class="table-part-target leg" id="target-leg2" style="top: 81px; left: 34%; width: 14px; height: 85px;"></div>
+          <div class="table-part-target leg" id="target-leg3" style="top: 81px; left: 64%; width: 14px; height: 85px;"></div>
+          <div class="table-part-target leg" id="target-leg4" style="top: 81px; left: 82%; width: 14px; height: 95px;"></div>
         </div>
         <div class="parts-inventory" id="partsInventory"></div>
       </div>
@@ -504,8 +521,10 @@
   let currentPurrIndex = 0;
   let currentPurrAudio = null;
   let fadeInterval = null;
+  let isInteractingWithCat = false;
+  let cleanupCatEvents = null;
 
-  // Предзагрузка аудиофайлов при первом касании (разблокировка автозвука на iOS/Android)
+  // Предзагрузка аудиофайлов при первом касании
   function unlockAudio() {
     purrAudioElements.forEach(audio => {
       audio.play().then(() => {
@@ -522,6 +541,10 @@
 
   // Поочередный запуск воспроизведения
   function startPurr() {
+    // Воспроизводим звук ТОЛЬКО на шаге с котиком и ТОЛЬКО при активном контакте
+    if (steps[currentStep] && !steps[currentStep].isCatPet) return;
+    if (!isInteractingWithCat) return;
+
     if (fadeInterval) {
       clearInterval(fadeInterval);
       fadeInterval = null;
@@ -529,39 +552,52 @@
 
     if (currentPurrAudio) {
       currentPurrAudio.volume = 1;
-      return; // Уже играет
+      return;
     }
 
-    // Выбираем аудио поочередно
     currentPurrAudio = purrAudioElements[currentPurrIndex];
     currentPurrAudio.volume = 1;
     currentPurrAudio.currentTime = 0;
     currentPurrAudio.play().catch(e => console.log('Purr play error:', e));
 
-    // Переходим к следующему треку для следующего касания
     currentPurrIndex = (currentPurrIndex + 1) % purrAudioElements.length;
   }
 
-  // Плавное затухание (Fade-Out)
-  function stopPurr() {
-    if (!currentPurrAudio) return;
+  // Остановка воспроизведения (immediate = true выключает звук моментально)
+  function stopPurr(immediate = false) {
+    if (fadeInterval) {
+      clearInterval(fadeInterval);
+      fadeInterval = null;
+    }
 
-    if (fadeInterval) clearInterval(fadeInterval);
+    if (immediate) {
+      purrAudioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 1;
+      });
+      currentPurrAudio = null;
+      return;
+    }
+
+    if (!currentPurrAudio) return;
 
     const activeAudio = currentPurrAudio;
     currentPurrAudio = null;
 
-    const fadeDuration = 300; // 300 миллисекунд плавного затухания
-    const intervalStep = 30;
+    const fadeDuration = 200;
+    const intervalStep = 25;
     const fadeStep = activeAudio.volume / (fadeDuration / intervalStep);
 
     fadeInterval = setInterval(() => {
-      if (activeAudio.volume > fadeStep) {
+      if (activeAudio && activeAudio.volume > fadeStep) {
         activeAudio.volume -= fadeStep;
       } else {
-        activeAudio.volume = 0;
-        activeAudio.pause();
-        activeAudio.currentTime = 0;
+        if (activeAudio) {
+          activeAudio.volume = 0;
+          activeAudio.pause();
+          activeAudio.currentTime = 0;
+        }
         clearInterval(fadeInterval);
         fadeInterval = null;
       }
@@ -804,7 +840,7 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
-  // Игра "Сборка стола" с перемешиванием невыбранных ножек
+  // Игра "Сборка стола"
   function initTableGame() {
     const partsContainer = document.getElementById('partsInventory');
     
@@ -820,7 +856,7 @@
         { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵', placed: false }
       ];
 
-      // Первоначальное перемешивание
+      // Начальный случайный перемес
       parts.sort(() => Math.random() - 0.5);
       let placedLegsCount = 0;
 
@@ -850,13 +886,11 @@
                 renderButtons();
               }
             } else {
-              // Устанавливаем выбранную ножку
               part.placed = true;
               const target = document.getElementById(`target-${part.id}`);
               if (target) target.classList.add('placed');
               placedLegsCount++;
 
-              // Перемешиваем случайным образом все оставшиеся неустановленные элементы!
               shuffleUnplacedParts();
               renderButtons();
             }
@@ -865,11 +899,24 @@
         });
       }
 
+      // Функция перемешивания, гарантирующая смену позиции столешницы
       function shuffleUnplacedParts() {
         const unplaced = parts.filter(p => !p.placed);
-        unplaced.sort(() => Math.random() - 0.5);
+        if (unplaced.length <= 1) return;
+
+        const oldTopIndex = unplaced.findIndex(p => p.type === 'top');
+
+        let shuffled;
+        do {
+          shuffled = [...unplaced].sort(() => Math.random() - 0.5);
+        } while (
+          oldTopIndex !== -1 &&
+          shuffled.length > 1 &&
+          shuffled.findIndex(p => p.type === 'top') === oldTopIndex
+        );
+
         let idx = 0;
-        parts = parts.map(p => p.placed ? p : unplaced[idx++]);
+        parts = parts.map(p => p.placed ? p : shuffled[idx++]);
       }
 
       renderButtons();
@@ -882,8 +929,20 @@
   function initCatPet() {
     const catImg = document.getElementById('chipsCatImg');
     let petProgress = 0;
+    isInteractingWithCat = false;
 
-    const handlePet = () => {
+    if (cleanupCatEvents) {
+      cleanupCatEvents();
+    }
+
+    const handleStart = () => {
+      isInteractingWithCat = true;
+      startPurr();
+    };
+
+    const handlePet = (e) => {
+      if (!isInteractingWithCat) return;
+      if (e.cancelable) e.preventDefault();
       startPurr();
       if (navigator.vibrate) {
         navigator.vibrate(30);
@@ -897,24 +956,31 @@
     };
 
     const handleStop = () => {
+      if (!isInteractingWithCat) return;
+      isInteractingWithCat = false;
       stopPurr();
     };
 
-    catImg.addEventListener('mouseenter', startPurr);
+    catImg.addEventListener('mousedown', handleStart);
     catImg.addEventListener('mousemove', handlePet);
-    catImg.addEventListener('mouseleave', handleStop);
+    
+    catImg.addEventListener('touchstart', handleStart, { passive: true });
+    catImg.addEventListener('touchmove', handlePet, { passive: false });
 
-    catImg.addEventListener('touchstart', (e) => {
-      startPurr();
-      handlePet();
-    }, { passive: true });
+    window.addEventListener('mouseup', handleStop);
+    window.addEventListener('touchend', handleStop);
+    window.addEventListener('touchcancel', handleStop);
 
-    catImg.addEventListener('touchmove', (e) => {
-      handlePet();
-    }, { passive: true });
+    cleanupCatEvents = () => {
+      catImg.removeEventListener('mousedown', handleStart);
+      catImg.removeEventListener('mousemove', handlePet);
+      catImg.removeEventListener('touchstart', handleStart);
+      catImg.removeEventListener('touchmove', handlePet);
 
-    catImg.addEventListener('touchend', handleStop);
-    catImg.addEventListener('touchcancel', handleStop);
+      window.removeEventListener('mouseup', handleStop);
+      window.removeEventListener('touchend', handleStop);
+      window.removeEventListener('touchcancel', handleStop);
+    };
   }
 
   // Пазл 4x5
@@ -984,6 +1050,15 @@
   }
 
   function renderStep() {
+    // При переключении любого шага отключаем все аудио со сбросом
+    isInteractingWithCat = false;
+    stopPurr(true);
+
+    if (cleanupCatEvents) {
+      cleanupCatEvents();
+      cleanupCatEvents = null;
+    }
+
     const data = steps[currentStep];
 
     const headerBlock = document.getElementById('headerBlock');
@@ -1159,7 +1234,8 @@
   }
 
   function nextStep() {
-    stopPurr();
+    isInteractingWithCat = false;
+    stopPurr(true);
     if (currentStep < steps.length - 1) {
       const wrapper = document.getElementById('fadeWrapper');
       wrapper.classList.add('fade-out');
