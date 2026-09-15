@@ -493,7 +493,7 @@
     window.Telegram.WebApp.expand();
   }
 
-  // Загрузка MP3-файлов мурлыканья
+  // Настройка MP3-файлов мурлыканья
   const purrAudioFiles = ['11.mp3', '22.mp3', '333.mp3'];
   const purrAudioElements = purrAudioFiles.map(src => {
     const audio = new Audio(src);
@@ -501,9 +501,11 @@
     return audio;
   });
 
+  let currentPurrIndex = 0;
   let currentPurrAudio = null;
+  let fadeInterval = null;
 
-  // Разблокировка воспроизведения аудио при первом нажатии
+  // Предзагрузка аудиофайлов при первом касании (разблокировка автозвука на iOS/Android)
   function unlockAudio() {
     purrAudioElements.forEach(audio => {
       audio.play().then(() => {
@@ -518,22 +520,52 @@
   window.addEventListener('touchstart', unlockAudio, { passive: true });
   window.addEventListener('mousedown', unlockAudio, { passive: true });
 
+  // Поочередный запуск воспроизведения
   function startPurr() {
-    if (currentPurrAudio) return; // Ужe играет
+    if (fadeInterval) {
+      clearInterval(fadeInterval);
+      fadeInterval = null;
+    }
 
-    // Случайный выбор одного из трех файлов
-    const randomIndex = Math.floor(Math.random() * purrAudioElements.length);
-    currentPurrAudio = purrAudioElements[randomIndex];
+    if (currentPurrAudio) {
+      currentPurrAudio.volume = 1;
+      return; // Уже играет
+    }
+
+    // Выбираем аудио поочередно
+    currentPurrAudio = purrAudioElements[currentPurrIndex];
+    currentPurrAudio.volume = 1;
     currentPurrAudio.currentTime = 0;
     currentPurrAudio.play().catch(e => console.log('Purr play error:', e));
+
+    // Переходим к следующему треку для следующего касания
+    currentPurrIndex = (currentPurrIndex + 1) % purrAudioElements.length;
   }
 
+  // Плавное затухание (Fade-Out)
   function stopPurr() {
-    if (currentPurrAudio) {
-      currentPurrAudio.pause();
-      currentPurrAudio.currentTime = 0;
-      currentPurrAudio = null;
-    }
+    if (!currentPurrAudio) return;
+
+    if (fadeInterval) clearInterval(fadeInterval);
+
+    const activeAudio = currentPurrAudio;
+    currentPurrAudio = null;
+
+    const fadeDuration = 300; // 300 миллисекунд плавного затухания
+    const intervalStep = 30;
+    const fadeStep = activeAudio.volume / (fadeDuration / intervalStep);
+
+    fadeInterval = setInterval(() => {
+      if (activeAudio.volume > fadeStep) {
+        activeAudio.volume -= fadeStep;
+      } else {
+        activeAudio.volume = 0;
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+        clearInterval(fadeInterval);
+        fadeInterval = null;
+      }
+    }, intervalStep);
   }
 
   // Массив всех шагов квеста
