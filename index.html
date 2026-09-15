@@ -88,10 +88,11 @@
       font-weight: 400;
     }
 
-    /* Карточка с иллюстрацией (Квест и Сертификаты) */
+    /* Карточка с иллюстрацией — полностью отображает картинку без обрезки */
     .media-card {
       width: 100%;
-      height: 280px;
+      height: auto;
+      max-height: 340px;
       margin: 12px 0;
       border-radius: 20px;
       overflow: hidden;
@@ -106,8 +107,9 @@
 
     .media-card img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      max-height: 340px;
+      object-fit: contain;
       display: block;
     }
 
@@ -343,7 +345,7 @@
       z-index: 2;
     }
 
-    /* Стили для обновленной светлой игры "Собери стол" */
+    /* Стили для светлой игры "Собери стол" */
     .table-game-container {
       width: 100%;
       display: flex;
@@ -364,7 +366,6 @@
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     }
 
-    /* Легкая фоновая сетка чертежа */
     .table-canvas::before {
       content: '';
       position: absolute;
@@ -382,7 +383,6 @@
       box-sizing: border-box;
     }
 
-    /* Установленная ножка стола (Светлое дерево) */
     .table-part-target.leg.placed {
       background: linear-gradient(90deg, #d4b08c 0%, #e6cbab 50%, #c49f7b 100%);
       border: 1px solid #b38b68;
@@ -390,7 +390,6 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* Установленная столешница (Светлый скандинавский дуб) */
     .table-part-target.top.placed {
       background: linear-gradient(180deg, #f0dfcc 0%, #dec4a6 100%);
       border: 1.5px solid #c4a482;
@@ -530,11 +529,11 @@
     window.Telegram.WebApp.expand();
   }
 
-  // Настройка MP3-файлов мурлыканья
+  // Настройка MP3-файлов мурлыканья без зацикливания (loop = false)
   const purrAudioFiles = ['11.mp3', '22.mp3', '333.mp3'];
   const purrAudioElements = purrAudioFiles.map(src => {
     const audio = new Audio(src);
-    audio.loop = true;
+    audio.loop = false; // Зацикливание убрано
     return audio;
   });
 
@@ -570,7 +569,9 @@
     }
 
     if (currentPurrAudio) {
-      currentPurrAudio.volume = 1;
+      if (currentPurrAudio.paused) {
+        currentPurrAudio.play().catch(e => console.log('Purr resume error:', e));
+      }
       return;
     }
 
@@ -582,7 +583,7 @@
     currentPurrIndex = (currentPurrIndex + 1) % purrAudioElements.length;
   }
 
-  // Остановка воспроизведения
+  // Плавно затухающая остановка воспроизведения
   function stopPurr(immediate = false) {
     if (fadeInterval) {
       clearInterval(fadeInterval);
@@ -604,18 +605,24 @@
     const activeAudio = currentPurrAudio;
     currentPurrAudio = null;
 
-    const fadeDuration = 200;
-    const intervalStep = 25;
-    const fadeStep = activeAudio.volume / (fadeDuration / intervalStep);
+    // Плавное плавное затухание (800 миллисекунд)
+    const fadeDuration = 800;
+    const intervalStep = 20;
+    const stepsCount = fadeDuration / intervalStep;
+    let step = 0;
+    const initialVolume = activeAudio.volume;
 
     fadeInterval = setInterval(() => {
-      if (activeAudio && activeAudio.volume > fadeStep) {
-        activeAudio.volume -= fadeStep;
+      step++;
+      if (activeAudio && step <= stepsCount) {
+        // Экспоненциальное сглаживание затухания
+        activeAudio.volume = Math.max(0, initialVolume * Math.pow(1 - (step / stepsCount), 2));
       } else {
         if (activeAudio) {
           activeAudio.volume = 0;
           activeAudio.pause();
           activeAudio.currentTime = 0;
+          activeAudio.volume = 1;
         }
         clearInterval(fadeInterval);
         fadeInterval = null;
