@@ -322,6 +322,74 @@
       transform: scale(0.94);
       z-index: 2;
     }
+
+    /* Стили для игры "Собери стол" */
+    .table-game-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin: 10px 0;
+    }
+
+    .table-canvas {
+      width: 100%;
+      height: 220px;
+      background: #1c1c1e;
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .table-part-target {
+      position: absolute;
+      border: 2px dashed rgba(255,255,255,0.3);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .table-part-target.placed {
+      background: #8b5a2b;
+      border: 1px solid #6d421e;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .table-part-target.top.placed {
+      background: #a67c52;
+      border: 1px solid #7d5935;
+    }
+
+    .parts-inventory {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .part-btn {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .part-btn:active {
+      transform: scale(0.95);
+    }
+
+    .part-btn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -330,7 +398,7 @@
   <div class="fade-wrapper" id="fadeWrapper">
     <!-- Шапка -->
     <div class="header" id="headerBlock">
-      <span class="step-badge" id="stepBadge">Шаг 1 из 14</span>
+      <span class="step-badge" id="stepBadge">Шаг 1 из 15</span>
       <h1 class="title" id="stepTitle">Заголовок</h1>
       <p class="description" id="stepDesc">Описание шага...</p>
     </div>
@@ -343,6 +411,20 @@
     <!-- Область для Пазла -->
     <div id="puzzleArea" style="display: none; width: 100%; margin: 12px 0;">
       <div class="puzzle-grid" id="puzzleContainer"></div>
+    </div>
+
+    <!-- Область для Мини-игры "Собери стол" -->
+    <div id="tableGameArea" style="display: none; width: 100%; margin: 12px 0;">
+      <div class="table-game-container">
+        <div class="table-canvas">
+          <div class="table-part-target top" id="target-top" style="top: 50px; left: 15%; width: 70%; height: 24px;"></div>
+          <div class="table-part-target leg" id="target-leg1" style="top: 74px; left: 18%; width: 16px; height: 100px;"></div>
+          <div class="table-part-target leg" id="target-leg2" style="top: 74px; left: 35%; width: 16px; height: 90px;"></div>
+          <div class="table-part-target leg" id="target-leg3" style="top: 74px; left: 62%; width: 16px; height: 90px;"></div>
+          <div class="table-part-target leg" id="target-leg4" style="top: 74px; left: 78%; width: 16px; height: 100px;"></div>
+        </div>
+        <div class="parts-inventory" id="partsInventory"></div>
+      </div>
     </div>
 
     <!-- Область для переходного текстового экрана -->
@@ -388,7 +470,7 @@
       btnText: "Начать ✨"
     },
     {
-      badge: "Шаг 1 из 14 • Уральск",
+      badge: "Шаг 1 из 15 • Уральск",
       title: "Глава 1: Первое чувство",
       desc: "Уральск. Город, где пересеклись два жизненных пути.",
       img: "https://i.postimg.cc/RhbcQyct/IMG-7708.jpg",
@@ -400,7 +482,7 @@
       ]
     },
     {
-      badge: "Шаг 2 из 14 • Воспоминания",
+      badge: "Шаг 2 из 15 • Воспоминания",
       title: "Глава 2: Вдали друг от друга",
       desc: "Учеба, ночной город и бесконечные звонки сквозь километры.",
       img: "https://i.postimg.cc/jjQPkLHr/IMG-7702.jpg",
@@ -410,7 +492,7 @@
       ]
     },
     {
-      badge: "Шаг 3 из 14 • Расстояние",
+      badge: "Шаг 3 из 15 • Расстояние",
       title: "Уфа ↔ Самара",
       desc: "",
       img: "https://i.postimg.cc/wMhrfvsp/IMG-7669.jpg",
@@ -422,7 +504,7 @@
       ]
     },
     {
-      badge: "Шаг 4 из 14 • Дом",
+      badge: "Шаг 4 из 15 • Дом",
       title: "Глава 3: Вместе в Самаре",
       desc: "Конец билетам и ожиданиям! Наконец-то общий дом и тёплые вечера.",
       img: "https://i.postimg.cc/ZK289kYm/IMG-7704.jpg",
@@ -433,7 +515,7 @@
       ]
     },
     {
-      badge: "Шаг 5 из 14 • Уют",
+      badge: "Шаг 5 из 15 • Уют",
       title: "Тёплые моменты",
       desc: "Когда дом наполняется радостью и общими мечтами.",
       img: "https://i.postimg.cc/tgHF5hVc/IMG-7705.jpg",
@@ -442,8 +524,17 @@
         { text: "К новым горизонтам! 🌊", correct: true }
       ]
     },
+
+    /* СТРАНИЦА "АРТЁМ, СОБЕРИ СТОЛ" */
     {
-      badge: "Шаг 6 из 14 • Манила",
+      badge: "Мастерская 🛠️",
+      title: "Артём, собери стол",
+      desc: "Нажимай на детали по очереди, чтобы собрать новый стол для дома!",
+      isTableGame: true
+    },
+
+    {
+      badge: "Шаг 6 из 15 • Манила",
       title: "Глава 4: Филиппины & «ДА!»",
       desc: "Ночной океан, звездное небо и самый важный ответ 💍",
       img: "https://i.postimg.cc/sxcZw87p/IMG-7694.jpg",
@@ -454,7 +545,7 @@
       ]
     },
     {
-      badge: "Шаг 7 из 14 • Алматы",
+      badge: "Шаг 7 из 15 • Алматы",
       title: "Глава 5: В горах",
       desc: "Вечерний костер, тишина гор и лучшая компания рядом.",
       img: "https://i.postimg.cc/dtC0sgLB/IMG-7698.jpg",
@@ -464,7 +555,7 @@
       ]
     },
     {
-      badge: "Шаг 8 из 14 • Праздник",
+      badge: "Шаг 8 из 15 • Праздник",
       title: "Тот самый день💍",
       desc: "Соберите пазл, чтобы восстановить самый важный кадр!",
       img: "https://i.postimg.cc/Qd3qJDDc/IMG-7670.jpg",
@@ -605,6 +696,46 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
+  // Логика сборки Стола
+  function initTableGame() {
+    const partsContainer = document.getElementById('partsInventory');
+    partsContainer.innerHTML = '';
+    
+    // Сброс всех целей
+    document.querySelectorAll('.table-part-target').forEach(t => t.classList.remove('placed'));
+
+    const parts = [
+      { id: 'leg1', name: 'Левая ножка 🦵' },
+      { id: 'leg2', name: 'Задняя ножка 🦵' },
+      { id: 'leg3', name: 'Задняя ножка 🦵' },
+      { id: 'leg4', name: 'Правая ножка 🦵' },
+      { id: 'top', name: 'Столешница 🪵' }
+    ];
+
+    let placedCount = 0;
+
+    parts.forEach(part => {
+      const btn = document.createElement('button');
+      btn.className = 'part-btn';
+      btn.innerText = part.name;
+      btn.onclick = () => {
+        const target = document.getElementById(`target-${part.id}`);
+        if (target && !target.classList.contains('placed')) {
+          target.classList.add('placed');
+          btn.classList.add('disabled');
+          placedCount++;
+
+          if (placedCount === parts.length) {
+            triggerPopPopper();
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) nextBtn.classList.add('visible');
+          }
+        }
+      };
+      partsContainer.appendChild(btn);
+    });
+  }
+
   // Логика сборки Пазла 4x5
   function initPuzzle(imgUrl) {
     const puzzleContainer = document.getElementById('puzzleContainer');
@@ -679,6 +810,7 @@
     const headerBlock = document.getElementById('headerBlock');
     const mediaCardContainer = document.getElementById('mediaCardContainer');
     const puzzleArea = document.getElementById('puzzleArea');
+    const tableGameArea = document.getElementById('tableGameArea');
     const introTextBlock = document.getElementById('introTextBlock');
     const kissScreen = document.getElementById('kissScreen');
     const giftCardArea = document.getElementById('giftCardArea');
@@ -689,6 +821,7 @@
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
+      tableGameArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       kissScreen.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -706,6 +839,7 @@
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
+      tableGameArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       introTextBlock.style.display = 'none';
       interactiveArea.style.display = 'none';
@@ -724,9 +858,25 @@
     document.getElementById('stepTitle').innerText = data.title;
     document.getElementById('stepDesc').innerText = data.desc;
 
-    // 1. РЕЖИМ ПАЗЛА
+    // 1. РЕЖИМ МИНИ-ИГРЫ "СОБЕРИ СТОЛ"
+    if (data.isTableGame) {
+      mediaCardContainer.style.display = 'none';
+      puzzleArea.style.display = 'none';
+      giftCardArea.style.display = 'none';
+      tableGameArea.style.display = 'block';
+
+      interactiveArea.innerHTML = `
+        <button class="next-btn" id="nextBtn" onclick="nextStep()">Продолжить ➔</button>
+      `;
+
+      initTableGame();
+      return;
+    }
+
+    // 2. РЕЖИМ ПАЗЛА
     if (data.isPuzzle) {
       mediaCardContainer.style.display = 'none';
+      tableGameArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       puzzleArea.style.display = 'block';
 
@@ -740,10 +890,11 @@
       return;
     }
 
-    // 2. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
+    // 3. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
     if (data.isScratch) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
+      tableGameArea.style.display = 'none';
       giftCardArea.style.display = 'block';
 
       const giftImg = document.getElementById('giftImg');
@@ -760,10 +911,11 @@
       return;
     }
 
-    // 3. РЕЖИМ СЕРТИФИКАТА
+    // 4. РЕЖИМ СЕРТИФИКАТА
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'flex';
       puzzleArea.style.display = 'none';
+      tableGameArea.style.display = 'none';
       giftCardArea.style.display = 'none';
       document.getElementById('stepImg').src = data.img;
 
@@ -776,9 +928,10 @@
       return;
     }
 
-    // 4. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
+    // 5. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
     mediaCardContainer.style.display = 'flex';
     puzzleArea.style.display = 'none';
+    tableGameArea.style.display = 'none';
     giftCardArea.style.display = 'none';
     document.getElementById('stepImg').src = data.img;
 
