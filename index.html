@@ -455,7 +455,7 @@
     <!-- Область для игры "Погладь Чипса" -->
     <div id="catPetArea" style="display: none; width: 100%;">
       <div class="cat-pet-container">
-        <img id="chipsCatImg" class="cat-img" src="https://i.postimg.cc/Ss6nGH7t/IMG-7720.png" alt="Кот Чипс">
+        <img id="chipsCatImg" class="cat-img" src="https://i.postimg.cc/fL9cQH7T/IMG-7719.jpg" alt="Кот Чипс">
       </div>
     </div>
 
@@ -493,9 +493,81 @@
     window.Telegram.WebApp.expand();
   }
 
+  // Аудио-контекст Web Audio API с разблокировкой по клику
+  let audioCtx = null;
+  let purrOsc = null;
+  let purrGain = null;
+
+  function initAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // Разблокируем звук при любом касании экрана пользователем
+  window.addEventListener('touchstart', initAudioContext, { once: true });
+  window.addEventListener('mousedown', initAudioContext, { once: true });
+
+  // Запуск синтеза звука мурлыканья
+  function startPurr() {
+    initAudioContext();
+    if (!audioCtx) return;
+
+    if (!purrOsc) {
+      try {
+        purrOsc = audioCtx.createOscillator();
+        purrGain = audioCtx.createGain();
+
+        // Низкая несущая частота для эффекта урчания
+        purrOsc.type = 'sawtooth';
+        purrOsc.frequency.setValueAtTime(50, audioCtx.currentTime);
+
+        // LFO (Низкочастотный осциллятор) для ритмичного вибрирования
+        const lfo = audioCtx.createOscillator();
+        const lfoGain = audioCtx.createGain();
+        lfo.frequency.setValueAtTime(22, audioCtx.currentTime);
+        lfoGain.gain.setValueAtTime(20, audioCtx.currentTime);
+
+        lfo.connect(purrOsc.frequency);
+        lfo.start();
+
+        // Небольшая громкость
+        purrGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+        purrOsc.connect(purrGain);
+        purrGain.connect(audioCtx.destination);
+        purrOsc.start();
+      } catch (e) {
+        console.log('Audio start error:', e);
+      }
+    }
+  }
+
+  function stopPurr() {
+    if (audioCtx && purrGain) {
+      try {
+        purrGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+        setTimeout(() => {
+          if (purrOsc) {
+            purrOsc.stop();
+            purrOsc.disconnect();
+            purrOsc = null;
+          }
+        }, 100);
+      } catch (e) {
+        console.log('Audio stop error:', e);
+      }
+    }
+  }
+
   // Массив всех шагов квеста
   const steps = [
-    // Вводный экран перед всем квестом
     {
       isIntroText: true,
       text: "Начало истории:",
@@ -603,15 +675,13 @@
     },
 
     /* ЭКРАН-ПЕРЕХОД И ПОДАРКИ */
-
-    // Переходный экран перед подарками
     {
       isIntroText: true,
       text: "Желаю вам наслаждаться каждым днем совместной жизни так же, как…",
       btnText: "Продолжить ✨"
     },
     
-    // Подарок 1: Карточка Люмисфера (Скретч)
+    // Подарок 1: Карточка Люмисфера
     {
       badge: "Подарок 1 из 3 🎁",
       title: "чарующей музыкой в окружении тысяч свечей",
@@ -620,7 +690,6 @@
       isScratch: true,
       btnText: "Получить сертификат 🎟️"
     },
-    // Сертификат 1: Сертификат Люмисфера (Чистая картинка + Хлопушка)
     {
       badge: "Ваш Сертификат 🎁",
       title: "Концерт Люмисфера 🎻",
@@ -630,7 +699,7 @@
       btnText: "Следующий подарок ➔"
     },
 
-    // Подарок 2: Карточка Кулинарного мастер-класса (Скретч)
+    // Подарок 2: Кулинарный мастер-класс
     {
       badge: "Подарок 2 из 3 🎁",
       title: "вкусной едой, приготовленной своими руками",
@@ -639,7 +708,6 @@
       isScratch: true,
       btnText: "Получить сертификат 🎟️"
     },
-    // Сертификат 2: Кулинарный мастер-класс (Чистая картинка + Хлопушка)
     {
       badge: "Ваш Сертификат 🎁",
       title: "Кулинарный мастер-класс 🍳",
@@ -649,7 +717,7 @@
       btnText: "Третий подарок ➔"
     },
 
-    // Подарок 3: Карточка Глэмпинга (Скретч)
+    // Подарок 3: Глэмпинг
     {
       badge: "Подарок 3 из 3 🎁",
       title: "незабываемыми вечерами на лоне природы",
@@ -658,7 +726,6 @@
       isScratch: true,
       btnText: "Получить сертификат 🎟️"
     },
-    // Сертификат 3: Глэмпинг (Чистая картинка + Хлопушка + Финал)
     {
       badge: "Финальный Сертификат 🎁",
       title: "Отдых в Глэмпинге ⛺",
@@ -668,7 +735,6 @@
       btnText: "Далее ➔"
     },
 
-    // Пустая финальная страница со смайликом 😘
     {
       isKissScreen: true
     }
@@ -736,7 +802,7 @@
     window.addEventListener('touchend', () => { isDrawing = false; });
   }
 
-  // Логика сборки Стола (с проверкой порядка)
+  // Сборка стола
   function initTableGame() {
     const partsContainer = document.getElementById('partsInventory');
     
@@ -752,9 +818,7 @@
         { id: 'leg4', type: 'leg', name: 'Ножка 4 🦵' }
       ];
 
-      // Перемешиваем детали
       parts.sort(() => Math.random() - 0.5);
-
       let placedLegsCount = 0;
 
       parts.forEach(part => {
@@ -792,55 +856,7 @@
     resetTable();
   }
 
-  // Звук мурлыканья через Web Audio API
-  let purrAudioCtx = null;
-  let purrOsc = null;
-  let purrGain = null;
-
-  function startPurr() {
-    if (!purrAudioCtx) {
-      purrAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (purrAudioCtx.state === 'suspended') {
-      purrAudioCtx.resume();
-    }
-    if (!purrOsc) {
-      purrOsc = purrAudioCtx.createOscillator();
-      purrGain = purrAudioCtx.createGain();
-
-      purrOsc.type = 'sawtooth';
-      purrOsc.frequency.setValueAtTime(45, purrAudioCtx.currentTime);
-
-      const lfo = purrAudioCtx.createOscillator();
-      const lfoGain = purrAudioCtx.createGain();
-      lfo.frequency.setValueAtTime(25, purrAudioCtx.currentTime);
-      lfoGain.gain.setValueAtTime(15, purrAudioCtx.currentTime);
-
-      lfo.connect(purrOsc.frequency);
-      lfo.start();
-
-      purrGain.gain.setValueAtTime(0.08, purrAudioCtx.currentTime);
-
-      purrOsc.connect(purrGain);
-      purrGain.connect(purrAudioCtx.destination);
-      purrOsc.start();
-    }
-  }
-
-  function stopPurr() {
-    if (purrAudioCtx && purrGain) {
-      purrGain.gain.setTargetAtTime(0, purrAudioCtx.currentTime, 0.05);
-      setTimeout(() => {
-        if (purrOsc) {
-          purrOsc.stop();
-          purrOsc.disconnect();
-          purrOsc = null;
-        }
-      }, 100);
-    }
-  }
-
-  // Логика "Погладь Чипса"
+  // Игра "Погладь Чипса"
   function initCatPet() {
     const catImg = document.getElementById('chipsCatImg');
     let petProgress = 0;
@@ -850,7 +866,7 @@
       if (navigator.vibrate) navigator.vibrate(40);
 
       petProgress++;
-      if (petProgress > 15) {
+      if (petProgress > 12) {
         const nextBtn = document.getElementById('nextBtn');
         if (nextBtn) nextBtn.classList.add('visible');
       }
@@ -860,18 +876,24 @@
       stopPurr();
     };
 
+    catImg.addEventListener('mouseenter', startPurr);
     catImg.addEventListener('mousemove', handlePet);
     catImg.addEventListener('mouseleave', handleStop);
 
-    catImg.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+    catImg.addEventListener('touchstart', (e) => {
+      startPurr();
       handlePet();
-    }, { passive: false });
+    }, { passive: true });
+
+    catImg.addEventListener('touchmove', (e) => {
+      handlePet();
+    }, { passive: true });
 
     catImg.addEventListener('touchend', handleStop);
+    catImg.addEventListener('touchcancel', handleStop);
   }
 
-  // Логика сборки Пазла 4x5
+  // Пазл 4x5
   function initPuzzle(imgUrl) {
     const puzzleContainer = document.getElementById('puzzleContainer');
     puzzleContainer.innerHTML = '';
@@ -950,7 +972,6 @@
     const giftCardArea = document.getElementById('giftCardArea');
     const interactiveArea = document.getElementById('interactiveArea');
 
-    // 0. РЕЖИМ ПЕРЕХОДНОГО / СТАРТОВОГО ТЕКСТОВОГО ЭКРАНА
     if (data.isIntroText) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
@@ -969,7 +990,6 @@
       return;
     }
 
-    // 0.1. РЕЖИМ ФИНАЛЬНОГО ЭКРАНА С ЦЕЛУЮЩИМ СМАЙЛИКОМ 😘
     if (data.isKissScreen) {
       headerBlock.style.display = 'none';
       mediaCardContainer.style.display = 'none';
@@ -984,7 +1004,6 @@
       return;
     }
 
-    // Возвращаем видимость основных элементов
     headerBlock.style.display = 'flex';
     introTextBlock.style.display = 'none';
     kissScreen.style.display = 'none';
@@ -994,7 +1013,6 @@
     document.getElementById('stepTitle').innerText = data.title;
     document.getElementById('stepDesc').innerText = data.desc;
 
-    // 1. РЕЖИМ МИНИ-ИГРЫ "СОБЕРИ СТОЛ"
     if (data.isTableGame) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
@@ -1010,7 +1028,6 @@
       return;
     }
 
-    // 2. РЕЖИМ МИНИ-ИГРЫ "ПОГЛАДЬ ЧИПСА"
     if (data.isCatPet) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
@@ -1026,7 +1043,6 @@
       return;
     }
 
-    // 3. РЕЖИМ ПАЗЛА
     if (data.isPuzzle) {
       mediaCardContainer.style.display = 'none';
       tableGameArea.style.display = 'none';
@@ -1044,7 +1060,6 @@
       return;
     }
 
-    // 4. РЕЖИМ СКРЕТЧ-КАРТОЧКИ
     if (data.isScratch) {
       mediaCardContainer.style.display = 'none';
       puzzleArea.style.display = 'none';
@@ -1066,7 +1081,6 @@
       return;
     }
 
-    // 5. РЕЖИМ СЕРТИФИКАТА
     if (data.isCertificate) {
       mediaCardContainer.style.display = 'flex';
       puzzleArea.style.display = 'none';
@@ -1084,7 +1098,6 @@
       return;
     }
 
-    // 6. ОБУЧАЮЩИЕ И ОБЫЧНЫЕ ШАГИ КВЕСТА
     mediaCardContainer.style.display = 'flex';
     puzzleArea.style.display = 'none';
     tableGameArea.style.display = 'none';
